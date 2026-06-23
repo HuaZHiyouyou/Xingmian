@@ -1,0 +1,59 @@
+# AI Chat 配置文件
+# 在此配置各平台的 API 密钥和模型
+
+platforms:
+  - displayName: OpenAI
+    enabled: false
+    apiKey: ""
+    baseUrl: "https://api.openai.com/v1"
+    models:
+      - name: "gpt-4o"
+        type: chat
+        enabled: true
+        pinned: true
+
+  - displayName: Anthropic
+    enabled: false
+    apiKey: ""
+    baseUrl: "https://api.anthropic.com/v1"
+    models:
+      - name: "claude-sonnet-4"
+        type: chat
+        enabled: true
+        pinned: true
+
+  - displayName: Google Gemini
+    enabled: false
+    apiKey: ""
+    baseUrl: "https://generativelanguage.googleapis.com"
+    models: []
+
+  - displayName: Groq
+    enabled: false
+    apiKey: ""
+    baseUrl: "https://api.groq.com/openai/v1"
+    models: []
+
+  - displayName: DeepSeek
+    enabled: false
+    apiKey: ""
+    baseUrl: "https://api.deepseek.com"
+    models: []
+
+  - displayName: 硅基流动
+    enabled: false
+    apiKey: ""
+    baseUrl: "https://api.siliconflow.cn/v1"
+    models: []
+
+  - displayName: 自定义
+    enabled: false
+    apiKey: ""
+    baseUrl: ""
+    models: []
+
+# 模型类型说明:
+#   chat  - 对话模型
+#   vision - 视觉/图片理解模型
+#   audio  - 语音模型
+#   video  - 视频模型
