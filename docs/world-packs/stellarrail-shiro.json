@@ -1,0 +1,54 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_starrail",
+  "name": "星空列车与白的旅行 · 银河号之梦",
+  "worldType": "dream_train",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《星空列车与白的旅行》（shiratamaco，Steam中文版2021年发行）· 非官方同人参考包",
+    "description": "银河号蒸汽火车上的梦境之旅——器官捐赠者与被拯救者的告别",
+    "era": "梦境与现实交织的当下",
+    "lore": "厌倦一成不变生活的动画师锺城晓报名了一场蒸汽火车观光旅行。「银河号」穿过星空下的黑暗，车上有友善的乘客、冒失的乘务员、猫耳少女诺瓦……随着旅途进行，乘客们逐渐意识到：这趟列车行驶在少女夜羽真白的梦境中。他们都已离世——因为器官移植到了真白身上而在此聚首。这是一场跨越生死的温柔告别。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "Steam中文版完结",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25（完结），星空列车与白的旅行版权归 shiratamaco/Syawase Works 所有。",
+    "locations": [
+      "银河号蒸汽火车", "茂盛的森林站", "美丽的海滩站", "函馆天象馆",
+      "岩手县", "夜羽真白的病房"
+    ],
+    "transport": ["银河号蒸汽火车"],
+    "currency": ["无（梦境）"],
+    "activities": {
+      "daily": ["在车厢里和乘客聊天", "在每个站点下车探索", "和诺瓦一起看星星", "品尝旅途中的美食", "夜里听着车轮声入睡"],
+      "work": ["探索每个站点背后的回忆", "逐渐揭开旅行的真正含义"],
+      "leisure": ["天象馆看星象", "海边漫步", "车厢里的游戏时光"],
+      "social": ["乘客们的聚餐", "篝火晚会"],
+      "special": ["梦境真相的揭晓", "与真白的最终告别"]
+    },
+    "events": [
+      "诺瓦又发呆了",
+      "狩叶慌张地报出了错误的站名",
+      "花江的烟味让诺瓦皱起了眉头",
+      "窗外的星空美得不像话"
+    ],
+    "terminology": {
+      "银河号": "穿越梦境的蒸汽观光火车",
+      "诺瓦": "真白在梦中的化身",
+      "器官移植": "将逝者的器官移植给需要的人"
+    },
+    "factions": [
+      { "name": "银河号的旅客们", "description": "器官捐赠者们的灵魂聚首" },
+      { "name": "夜羽家", "description": "真白的家庭" }
+    ],
+    "characters": [
+      {"name":"锺城晓","rarity":"主角","nickname":"追梦动画师","affiliation":"无所属","role":"动画师","personality":"自暴自弃后重拾希望","speechStyle":"平淡中带着温柔的独白","deeds":"因房东女儿音理之死一蹶不振，在梦中与她重逢","relation":"主角本人"},
+      {"name":"诺瓦","rarity":"","nickname":"猫耳失忆少女","affiliation":"梦境","role":"真白的化身","personality":"怕生天真、感性烂漫","speechStyle":"软糯的轻声细语","deeds":"承载了真白感性一面的梦境分身","relation":"与晓最亲近的存在"},
+      {"name":"狩叶","rarity":"","nickname":"冒失乘务员","affiliation":"银河号","role":"乘务员","personality":"活泼慌张、努力过头","speechStyle":"元气满满的播报腔","deeds":"自称银河号向导却对火车一窍不通","relation":"给旅程增添欢乐的开心果"},
+      {"name":"风又音理","rarity":"","nickname":"房东的女儿","affiliation":"晓的公寓","role":"晓的邻居","personality":"温柔憧憬、善良勇敢","speechStyle":"轻柔温暖的邻家语气","deeds":"为救一只小猫而去世，心脏移植给了真白","relation":"晓暗恋的对象，故事的情感核心"},
+      {"name":"象牙花江","rarity":"","nickname":"烟瘾女演员","affiliation":"银河号","role":"乘客","personality":"豪爽洒脱","speechStyle":"成熟女演员的从容","deeds":"函馆出身的女演员，烟火火灾中丧生","relation":"旅途中的大姐姐"},
+      {"name":"野鸟","rarity":"","nickname":"瑞典留学生","affiliation":"银河号","role":"乘客","personality":"开朗健谈","speechStyle":"外国留学生的活泼日语","deeds":"原名珍妮弗·玛妮欧德，留学期间病逝","relation":"永远元气满满的同伴"}
+    ],
+    "taboos": ["恐怖惊悚化", "过度欢快化（基调温暖而哀伤）"],
+    "timeNotes": "梦境时间模糊；列车永不停歇地驶向黎明"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_codegeass",
+  "name": "Code Geass · 黑色骑士团",
+  "worldType": "mecha_strategy",
+  "isBuiltin": true,
+  "config": {
+    "source": "动画《Code Geass 反叛的鲁路修》（SUNRISE，MAL评分8.91）· 非官方同人参考包",
+    "description": "被灭国的皇子以Geass之力向帝国宣战的复仇剧",
+    "era": "皇历2017年，超级大国不列颠尼亚统治下的日本「11区」",
+    "lore": "不列颠尼亚帝国的第11皇子鲁路修，目睹母亲遇刺、妹妹失明致残后被父亲放逐至日本。七年后，他与神秘少女C.C.缔约获得绝对命令之力「Geass」，化身为假面英雄Zero，率领黑色骑士团向庞大的帝国宣战——为了摧毁世界，也为了创造温柔的世界。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "R2完结",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25（R2完结），Code Geass版权归 SUNRISE/大河内一楼 所有。",
+    "locations": [
+      "阿什弗德学园", "11区(原日本)各地", "黑色骑士团秘密基地", "中华联邦", "神根岛", "不列颠尼亚本土 Pendragon"
+    ],
+    "transport": ["Knightmare Frame机甲(兰斯洛特/红莲二式)", "汽车", "步行"],
+    "currency": ["美元"],
+    "activities": {
+      "daily": ["学园的学生会日常(伪装)", "作为Zero指挥作战", "Knightmare模拟战训练", "与C.C.的下棋密谈", "照顾妹妹娜娜莉"],
+      "work": ["策划军事行动", "黑骑团的政治运营", "对抗不列颠尼亚皇族"],
+      "leisure": ["学生会活动", "赌Chess棋局(百战百胜)"],
+      "social": ["学园祭的豪华自助餐", "庆功宴"],
+      "special": ["Zero的假面演说", "与宿敌朱雀的宿命对决"]
+    },
+    "events": [
+      "Zero又发表了震撼全国的演说",
+      "红莲二式的辐射波动一击破敌",
+      "朱雀驾驶兰斯洛特追击Zero",
+      "皇帝查尔斯发表了虚伪的演说"
+    ],
+    "terminology": {
+      "Geass": "实现愿望的王之力，每人能力不同",
+      "Knightmare Frame": "人型战斗机甲",
+      "黑色骑士团": "Zero创建的正义之师",
+      "11区": "被占领后的日本的蔑称"
+    },
+    "factions": [
+      { "name": "黑色骑士团", "description": "Zero麾下的正义之军" },
+      { "name": "神圣不列颠尼亚帝国", "description": "鲁路修出身的庞大帝国" },
+      { "name": "中华联邦", "description": "东方的大国势力" }
+    ],
+    "characters": [
+      {"name":"鲁路修·兰佩路基","rarity":"主角","nickname":"Zero · 黑色皇子","affiliation":"黑色骑士团 / 阿什弗德学园","role":"学生 · 反抗军领袖","personality":"智谋超群、为妹妹可弃世界","speechStyle":"舞台剧般华丽的中二宣言","deeds":"以Geass和智谋撼动世界的复仇皇子，「零之镇魂曲」的执行者","relation":"主角本人"},
+      {"name":"枢木朱雀","rarity":"","nickname":"白色死神 Lancelot驾驶员","affiliation":"不列颠尼亚军","role":"军人 · Knightmare驾驶员","personality":"正直到扭曲的理想主义者","speechStyle":"正义凛然却令人心碎的真诚","deeds":"驾驶兰斯洛特的超级王牌，鲁路修的挚友兼宿敌","relation":"童年挚友、战场宿敌的双子星"},
+      {"name":"C.C.","rarity":"","nickname":"不老不死的魔女","affiliation":"无所属","role":"Geass授予者","personality":"慵懒神秘、渴望被爱","speechStyle":"谜语般的淡漠低语","deeds":"赋予Geass的不死魔女，唯一的愿望是「被爱」","relation":"与鲁路修缔约共谋的契约魔女"},
+      {"name":"娜娜莉·兰佩路基","rarity":"","nickname":"失明的天使","affiliation":"阿什弗德学园","role":"学生 · 妹妹","personality":"善良坚强、双目失明双腿不便","speechStyle":"温柔纯真的妹妹声线","deeds":"鲁路修一切行动的原点与软肋","relation":"鲁路修愿为她毁灭并重塑世界的妹妹"}
+    ],
+    "taboos": ["轻松日常化(战略博弈为核心)", "简单善恶二元论(作品核心是灰色)"],
+    "timeNotes": "学生与Zero双重身份的时间管理"
+  }
+}

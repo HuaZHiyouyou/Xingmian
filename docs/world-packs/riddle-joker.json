@@ -1,0 +1,51 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_riddlejoker",
+  "name": "Riddle Joker · 隐藏的魔法使",
+  "worldType": "hidden_magic",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《Riddle Joker》（YUZUSOFT，柚子社人气作·三司绫濑线广受好评）· 非官方同人参考包",
+    "description": "魔法使隐匿于现代社会，双面生活的恋爱物语",
+    "era": "现代日本，星见市",
+    "lore": "在这个世界，「魔法使」真实存在，却必须向普通人隐藏身份。隶属于组织「Asterisk」的兄妹潜伏于星见市执行任务，哥哥以普通学生身份入学——却发现班上的完美学姐三司绫濑，竟然是敌我难分的同僚。双重身份的恋爱喜剧与魔法组织的暗斗同时展开。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "Steam中文版",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25，Riddle Joker版权归 YUZUSOFT/NekoNyan 所有。",
+    "locations": [
+      "星见市", "常盘台学园", "主角与七海的公寓", "Asterisk据点", "游乐园", "夜间的任务现场"
+    ],
+    "transport": ["步行", "电车", "魔法飞行(隐秘)"],
+    "currency": ["日元"],
+    "activities": {
+      "daily": ["普通学生的校园生活", "放学后社团活动", "秘密任务的执行", "和妹妹的日常拌嘴", "夜里研究魔法"],
+      "work": ["Asterisk的任务执行", "调查市内的魔法异动", "保护重要目标"],
+      "leisure": ["游乐园约会", "便利店零食大会", "游戏对战"],
+      "social": ["学园祭", "组织内部的聚餐"],
+      "special": ["魔法使身份暴露的危机", "组织背后的真相"]
+    },
+    "events": [
+      "绫濑学姐的完美伪装出现了破绽",
+      "七海又在背后策划了什么",
+      "市内检测到不明魔力波动",
+      "游乐园的新设施开业了"
+    ],
+    "terminology": {
+      "魔法使": "隐藏于现代社会的超能力者",
+      "Asterisk": "管理魔法使的秘密组织",
+      "魔力": "魔法使的能量源泉"
+    },
+    "factions": [
+      { "name": "Asterisk", "description": "魔法使的官方管理机构" },
+      { "name": "敌对魔法组织", "description": "觊觎力量的反派势力" }
+    ],
+    "characters": [
+      {"name":"主角","rarity":"主角","nickname":"退役魔法使","affiliation":"Asterisk(前)","role":"学生 · 前组织成员","personality":"可靠沉稳、深藏实力","speechStyle":"从容的吐槽系少年","deeds":"隐姓埋名过普通生活，却被再次卷入魔法世界","relation":"主角本人"},
+      {"name":"三司绫濑","rarity":"","nickname":"完美学姐 · 双面间谍","affiliation":"学园 / Asterisk相关","role":"学姐 · 魔法使","personality":"表面完美温柔、实则身负使命","speechStyle":"优雅完美的学姐腔","deeds":"校园偶像与秘密特工的双重身份","relation":"敌友难辨却逐渐交心的完美学姐"},
+      {"name":"在原七海","rarity":"","nickname":"毒舌妹妹","affiliation":"Asterisk","role":"妹妹 · 同伴","personality":"腹黑机灵、哥哥控","speechStyle":"SNS风格的毒舌调侃","deeds":"与哥哥共同潜入的妹妹兼作战搭档","relation":"嘴上嫌弃哥哥、关键时刻最可靠的妹妹"},
+      {"name":"式部茉优","rarity":"","nickname":"元气后辈","affiliation":"Asterisk","role":"后辈魔法使","personality":"元气努力、天然呆","speechStyle":"活泼的后辈敬语","deeds":"崇拜前辈的努力系新人","relation":"元气满满的后辈魔法使"}
+    ],
+    "taboos": ["暴露魔法使世界的存在给普通人(剧情设定)", "黑暗残酷走向"],
+    "timeNotes": "学生作息；夜间任务与白天校园的双重生活"
+  }
+}

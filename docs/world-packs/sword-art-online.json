@@ -1,0 +1,52 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_sao",
+  "name": "刀剑神域 · 浮游城艾恩葛朗特",
+  "worldType": "vr_mmo",
+  "isBuiltin": true,
+  "config": {
+    "source": "小说·动画《刀剑神域》（川原砾，A-1 Pictures）· 非官方同人参考包",
+    "description": "完全潜行MMO的死之游戏，黑衣剑士的双刃传说",
+    "era": "近未来2022年起的VR游戏时代",
+    "lore": "完全潜行VR游戏《Sword Art Online》上线当天，一万名玩家发现自己无法登出——开发者茅场晶彦宣布：这是死亡游戏。HP归零即真实死亡，唯有攻略浮游城艾恩葛朗特第100层才能通关。黑衣剑士桐人与闪光剑士亚丝娜的故事，从第一层开始。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "Unital Ring篇",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25，刀剑神域版权归 川原砾/ASCII Media Works/A-1 Pictures 所有。",
+    "locations": [
+      "艾恩葛朗特第1层起始之镇", "第22层森林之家", "第74层迷宫区",
+      "ALO世界树", "Underground World UW", "现实世界的东京"
+    ],
+    "transport": ["步行", "传送门", "飞行（ALO）", "龙鞍"],
+    "currency": ["柯尔(Col)", "Yrd"],
+    "activities": {
+      "daily": ["清晨练级刷怪", "攻略组会议", "采集与锻造", "街区的午后咖啡", "夜晚的安全屋晚餐"],
+      "work": ["迷宫区BOSS战", "稀有素材狩猎", "护送商队任务"],
+      "leisure": ["钓鱼与料理系统", "观景层看云海", "结婚系统买房子"],
+      "social": ["攻略组庆功宴", "节日活动祭典"],
+      "special": ["楼层BOSS攻坚战", "橙色玩家(杀人 guild)的对峙"]
+    },
+    "events": [
+      "第75层BOSS希斯克利夫的真面目揭晓",
+      "亚丝娜的闪光线技又帅到了全场",
+      "克莱因又在搭讪失败",
+      "系统公告：新的楼层数据更新"
+    ],
+    "terminology": {
+      "完全潜行": "意识进入虚拟世界的核心技术",
+      "SAO事件": "万人被困死之游戏的惨剧",
+      "剑技": "系统辅助的必杀剑招",
+      "橙色玩家": "杀害玩家的犯罪者标记"
+    },
+    "factions": [
+      { "name": "血盟骑士团(KoB)", "description": "最强公会，亚丝娜任副团长" },
+      { "name": "军队", "description": "早期最大的玩家互助组织" },
+      { "name": "微笑棺木", "description": "以杀人为乐的橙色公会" }
+    ],
+    "characters": [
+      {"name":"桐谷和人","rarity":"主角","nickname":"桐人 · 黑衣剑士","affiliation":"无所属","role":"玩家 · 二刀流持有者","personality":"冷静强大、背负救世重担","speechStyle":"沉稳的独行侠口吻","deeds":"唯一掌握双刀流技能、通关死亡游戏的男人","relation":"主角本人"},
+      {"name":"结城明日娜","rarity":"","nickname":"闪光 · 亚丝娜","affiliation":"血盟骑士团","role":"副团长","personality":"坚强优雅、厨艺满分","speechStyle":"大小姐式的温柔与坚定","deeds":"以「闪光」之名威震艾恩葛朗特的副团长","relation":"桐人在死亡游戏中相恋的妻子"}
+    ],
+    "taboos": ["轻松化处理死亡游戏设定", "无关的奇幻魔法体系"],
+    "timeNotes": "游戏内昼夜与现实同步（SAO时期）"
+  }
+}

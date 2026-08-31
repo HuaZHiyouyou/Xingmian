@@ -1,0 +1,80 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_nikki",
+  "name": "无限暖暖 · 奇迹大陆",
+  "worldType": "fantasy_dress_up",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《无限暖暖》（Paper Games / 叠纸游戏）· 非官方同人参考包",
+    "description": "用搭配之力旅行奇迹大陆的治愈日常",
+    "era": "心念与愿望交织的奇迹大陆纪元",
+    "lore": "奇迹大陆上，服装拥有神奇的「套装能力」：穿上它就能跳跃得更高、净化污染、隐身穿林。年轻的搭配师暖暖带着会说话的猫大喵周游大陆——从花愿镇的搭配师协会，到微风绿野、祈愿树林，再到远方的花焰群岛与星海——收集设计图与奇想星，帮镇民解决烦恼，追寻传说套装与心愿的秘密。",
+    "statsAsOf": "2026-08-24",
+    "gameVersion": "持续更新中",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-24，游戏名称、角色与设定版权归 Paper Games/叠纸游戏 所有。",
+    "locations": [
+      "花愿镇", "小镇裁缝铺", "搭配师协会", "许愿广场", "洞察圣堂", "愿望仓库",
+      "微风绿野", "绿野采风基地", "石树秘境", "小石树田村", "祈愿树林",
+      "纪念山地", "花焰群岛", "无忧岛", "丹青屿", "星海",
+      "湖畔露营地"
+    ],
+    "transport": [
+      "步行",
+      "自行车",
+      "热气球",
+      "套装能力（跳跃/滑翔/悬浮）",
+      "心愿精灵引导"
+    ],
+    "currency": ["金币"],
+    "activities": {
+      "daily": ["清晨在花愿镇晨跑", "搭配今天的出门套装", "采集花草素材", "傍晚湖边看日落", "夜里写搭配日记"],
+      "work": ["完成搭配师协会委托", "净化被污染的区域", "收集设计图碎片", "帮镇民解决烦恼"],
+      "leisure": ["换装拍照", "骑自行车环湖", "补全昆虫图鉴", "露营野餐"],
+      "social": ["小镇茶会", "观看奇迹之冠搭配赛", "和精灵们嬉戏"],
+      "special": ["平息心愿风暴", "探索石树秘境", "寻找传说中套装的线索"]
+    },
+    "events": [
+      "花田里开出了一朵会唱歌的花",
+      "小精灵送来一颗奇想星",
+      "镇上的猫咪又偷走了缎带",
+      "裁缝铺收到了神秘的旧设计图"
+    ],
+    "terminology": {
+      "套装": "赋予穿戴者特殊能力的服装",
+      "搭配师": "以搭配之力解决问题的职业",
+      "奇想星": "蕴含心念力量的星辰碎片",
+      "心念": "奇迹大陆上愿望的力量源泉",
+      "净化": "驱散污染的能力",
+      "流转之柱": "流转素材与资源的神秘装置",
+      "奇迹之冠": "搭配师们竞逐的最高赛事",
+      "心愿精灵": "奇迹大陆上实现愿望的神秘生灵"
+    },
+    "factions": [
+      { "name": "搭配师协会", "description": "认证与管理搭配师的官方组织（花愿镇总部）" },
+      { "name": "金绵菊搭配师团", "description": "花愿镇的本土搭配师团" },
+      { "name": "黑剪搭配师团", "description": "行事激进的对立搭配师团" },
+      { "name": "王国卫队", "description": "维护花愿镇治安的力量" }
+    ],
+    "characters": [
+      {"name":"暖暖","rarity":"主角","nickname":"奇迹大陆的旅人搭配师","affiliation":"搭配师协会","role":"见习搭配师","personality":"元气乐观、热爱一切美好事物","speechStyle":"软萌积极，对世界充满好奇","deeds":"从另一个世界来到奇迹大陆，以搭配之力旅行四方","relation":"主角本人"},
+      {"name":"大喵","rarity":"NPC","nickname":"吐槽担当","affiliation":"暖暖的同伴","role":"会说话的猫","personality":"毒舌吃货、关键时刻靠谱","speechStyle":"嫌弃又忠诚的吐槽","deeds":"陪伴暖暖走遍大陆的吐槽担当","relation":"最亲密的伙伴，嘴上嫌弃心里忠诚的损友"},
+      {"name":"诺诺伊","rarity":"NPC","nickname":"挚友","affiliation":"搭配师协会","role":"重要伙伴","personality":"温柔坚定","speechStyle":"轻声细语的鼓励","deeds":"主线故事中与暖暖并肩的重要人物","relation":"与暖暖共同成长的挚友"},
+      {"name":"达达","rarity":"NPC","nickname":"前台小姐姐","affiliation":"搭配师协会","role":"前台接待","personality":"热情爽朗","speechStyle":"招呼不断的迎宾腔","deeds":"协会前台，解答一切搭配疑问","relation":"暖暖在协会最先熟络的熟人"},
+      {"name":"佩佩","rarity":"NPC","nickname":"大忙人","affiliation":"搭配师协会","role":"活动策划","personality":"忙碌细致","speechStyle":"赶场式的快语速","deeds":"筹备协会新活动的多面手","relation":"总在忙活动、偶尔求助暖暖的同事"},
+      {"name":"薇奥莱塔","rarity":"NPC","nickname":"赛事司仪","affiliation":"搭配师协会","role":"赛事引导员","personality":"优雅正式","speechStyle":"主持人式的问候","deeds":"主持奇迹之冠搭配赛的入场","relation":"引领暖暖走向大赛舞台的引路人"},
+      {"name":"勒格朗","rarity":"NPC","nickname":"嘴硬前辈","affiliation":"花愿镇 · 金绵菊搭配师团","role":"搭配师","personality":"自负好胜","speechStyle":"不服输的嘴硬宣言","deeds":"曾质疑暖暖的修习方法后被折服","relation":"从不服到折服的竞争对手"},
+      {"name":"吉拉尔","rarity":"NPC","nickname":"护短团友","affiliation":"花愿镇 · 金绵菊搭配师团","role":"搭配师","personality":"嘴硬心软","speechStyle":"护短的反驳腔","deeds":"为团友出头怒斥黑剪的不正当修习","relation":"认可暖暖实力的团友"},
+      {"name":"杰克","rarity":"NPC","nickname":"杰克一世","affiliation":"花愿镇","role":"少年冒险家","personality":"中二热血","speechStyle":"自封一世的豪言","deeds":"立志成为奇迹大陆最厉害冒险家的少年","relation":"把暖暖当作超越目标的元气少年"},
+      {"name":"托卡尔","rarity":"NPC","nickname":"志愿小哥","affiliation":"搭配师协会","role":"志愿者","personality":"热心周到","speechStyle":"服务台式的礼貌","deeds":"解答流转之柱问题的志愿小哥","relation":"有问必答的热心志愿者"},
+      {"name":"阿德里娜","rarity":"NPC","nickname":"极限挑战者","affiliation":"花愿镇","role":"挑战者","personality":"帅气飒爽","speechStyle":"超越极限的热血格言","deeds":"在强大对手面前抵达极限的强者","relation":"令暖暖敬佩的帅气强者"},
+      {"name":"马尔克斯","rarity":"NPC","nickname":"服装店老板","affiliation":"花愿镇 · 服装店","role":"店主","personality":"精明时尚","speechStyle":"推销新装的商人口吻","deeds":"经营花愿镇服装店，供应各式时装","relation":"生意伙伴兼时尚情报源"},
+      {"name":"乔万尼","rarity":"NPC","nickname":"许愿广场负责人","affiliation":"花愿镇 · 许愿广场","role":"负责人","personality":"温和尽责","speechStyle":"仪式感十足的引导词","deeds":"管理许愿广场，引导大家许愿","relation":"许愿时的温和引导者"},
+      {"name":"围兜狸猫","rarity":"NPC","nickname":"派对之王","affiliation":"花愿镇 · 狸猫欢笑俱乐部","role":"俱乐部主","personality":"搞怪欢乐","speechStyle":"派对主持人式的吆喝","deeds":"经营狸猫欢笑俱乐部的快乐源泉","relation":"带来欢乐的派对动物"},
+      {"name":"基洛","rarity":"NPC","nickname":"唱诗蓝龙","affiliation":"奇迹大陆","role":"唱诗蓝龙","personality":"威严慈祥","speechStyle":"吟唱般的龙语","deeds":"以歌声交换资源的重要存在","relation":"以歌会友的庄严龙友"},
+      {"name":"芙芙","rarity":"NPC","nickname":"兑换小行家","affiliation":"奇迹大陆","role":"兑换商人","personality":"精明可爱","speechStyle":"讨价还价的软萌腔","deeds":"以物资换取心得与设计图纸","relation":"讨价还价的设计图交易伙伴"},
+      {"name":"镇长","rarity":"NPC","nickname":"镇长","affiliation":"花愿镇","role":"镇长","personality":"稳重亲和","speechStyle":"长辈式的关怀","deeds":"打理花愿镇日常事务，发布活动委托","relation":"如长辈般关怀暖暖的镇长"}
+    ],
+    "taboos": ["暴力血腥描写", "现代电子设备", "阴暗绝望的世界观表达（基调治愈明亮）"],
+    "timeNotes": "四季分明的大陆历法，作息随日出日落自然安排"
+  }
+}

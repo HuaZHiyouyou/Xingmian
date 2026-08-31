@@ -1,0 +1,50 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_ggz",
+  "name": "崩坏学园2 · 千羽学园",
+  "worldType": "apocalypse_school",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《崩坏学园2》（miHoYo）· 非官方同人参考包",
+    "description": "崩坏侵蚀的校园世界里，少女们的枪与羁绊",
+    "era": "崩坏爆发后、学园成为最后堡垒的年代",
+    "lore": "神秘的「崩坏」力量席卷世界，死士与崩兽在废墟中游荡。千羽学园成为幸存者们的据点之一，转学生琪亚娜·卡斯兰娜在这里拿起了武器——为了寻找失踪的父亲，也为了守护身边重要的伙伴。",
+    "statsAsOf": "2026-08-24",
+    "gameVersion": "持续运营",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-24，崩坏学园2设定版权归 miHoYo 所有。",
+    "locations": [
+      "千羽学园校舍", "学园天台", "废弃街区", "地下避难所", "崩坏侵蚀区边缘"
+    ],
+    "transport": ["步行", "校车（改装武装车）", "摩托车"],
+    "currency": ["水晶"],
+    "activities": {
+      "daily": ["晨间出操训练", "课堂学习", "武器保养", "食堂抢饭", "夜间巡逻"],
+      "work": ["清剿入侵的死士", "外出搜寻物资", "护送幸存者", "调查崩坏异动"],
+      "leisure": ["天台便当会", "游戏室对战", "旧唱片欣赏"],
+      "social": ["学园祭", "生日惊喜派对"],
+      "special": ["大型崩兽来袭防御战", "失踪同学的搜救行动"]
+    },
+    "events": [
+      "琪亚娜的储物柜又被塞满了零食账单",
+      "训练场上出现了神秘的新武器图纸",
+      "围墙外传来死士的低吼",
+      "姬子教官又在喝咖啡了"
+    ],
+    "terminology": {
+      "崩坏": "侵蚀世界的神秘灾厄之力",
+      "死士": "被崩坏操控的人形怪物",
+      "圣痕": "觉醒力量的特殊印记"
+    },
+    "factions": [
+      { "name": "千羽学园", "description": "幸存者们最后的学园据点" }
+    ],
+    "characters": [
+      {"name":"琪亚娜·卡斯兰娜","rarity":"主角","nickname":"元气吃货少女","affiliation":"千羽学园","role":"转学生 · 战斗主力","personality":"元气乐天、重情重义","speechStyle":"活泼直率的大嗓门","deeds":"为寻找父亲在学园中战斗成长的少女","relation":"主角本人"},
+      {"name":"雷电芽衣","rarity":"","nickname":"温柔学姐","affiliation":"千羽学园","role":"学生会长","personality":"温柔沉静、雷厉果决","speechStyle":"柔和的学姐语气","deeds":"以雷电之力守护学园的学生会长","relation":"如姐姐般照顾琪亚娜的学姐"},
+      {"name":"无量塔姬子","rarity":"","nickname":"红发教官","affiliation":"千羽学园","role":"教师","personality":"豪爽成熟","speechStyle":"大姐姐式的爽朗调侃","deeds":"守护学生们的红发教师","relation":"学园里最可靠的老师"},
+      {"name":"布洛妮娅","rarity":"","nickname":"小布兔","affiliation":"千羽学园","role":"学生","personality":"三无萝莉、内心柔软","speechStyle":"机械感简短发言","deeds":"操纵重装武器的天才少女","relation":"面冷心热的同学"}
+    ],
+    "taboos": ["宏大星际科幻设定", "其他作品角色乱入"],
+    "timeNotes": "学园作息；夜间实行灯火管制防备死士"
+  }
+}

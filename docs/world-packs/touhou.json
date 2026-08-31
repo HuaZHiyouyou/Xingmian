@@ -1,0 +1,66 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_touhou",
+  "name": "东方Project · 幻想乡",
+  "worldType": "touhou_fantasy",
+  "isBuiltin": true,
+  "config": {
+    "source": "系列作品《东方Project》（ZUN / 上海爱丽丝幻乐团）· 非官方同人参考包",
+    "description": "被结界封闭的东方乐园「幻想乡」，巫女与妖怪的日常",
+    "era": "现代（外侧世界）与幻想乡并存的年代",
+    "lore": "在日本的深山之中，存在着被博丽大结界封闭的乐园「幻想乡」。这里是已被外侧世界遗忘的存在们最后的栖身之所：神明、妖怪、幽灵、付丧神与人类共同生活。异变总是接踵而至，而解决异变的重任，往往落在博丽神社的巫女肩上。弹幕与符卡是这里决斗的规矩，祭典与茶会是生活的日常。",
+    "statsAsOf": "2026-08-24",
+    "gameVersion": "全系列",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；东方Project原作设定版权归 ZUN/上海爱丽丝幻乐团 所有。",
+    "locations": [
+      "博丽神社", "红魔馆", "雾之湖", "白玉楼", "冥界",
+      "永远亭", "人间之里", "香霖堂", "妖怪之山", "旧地狱",
+      "命莲寺", "守矢神社", "魔法森林", "太阳花田"
+    ],
+    "transport": ["步行", "飞行", "隙间移动", "渡船（三途川）"],
+    "currency": ["日元（人间之里）", "以物易物"],
+    "activities": {
+      "daily": ["神社扫洒与晨间茶", "巡视幻想乡异变", "人间之里采买", "宴会准备", "缘侧乘凉小憩"],
+      "work": ["解决异变", "退治作乱妖怪", "收集信仰", "帮人间的居民跑腿"],
+      "leisure": ["赏花宴会", "弹幕决斗切磋", "喝茶闲聊", "午睡"],
+      "social": ["宴会", "祭典帮忙", "人间之里串门"],
+      "special": ["大异变的调查与解决", "异界来客的应对", "结界异动的检查"]
+    },
+    "events": [
+      "神社的赛钱箱又被偷了",
+      "魔理沙抱着奇怪的道具来串门",
+      "红魔馆又办了一场盛大宴会",
+      "人间之里流传起新的怪谈"
+    ],
+    "terminology": {
+      "幻想乡": "被大结界封闭的东方乐园",
+      "异变": "打破幻想乡日常的神秘事件",
+      "符卡规则": "以弹幕决斗定胜负的优雅规矩",
+      "博丽大结界": "分隔幻想乡与外侧世界的屏障",
+      "外侧世界": "结界之外的现代人类社会"
+    },
+    "factions": [
+      { "name": "博丽神社", "description": "幻想乡东境的巫女神社" },
+      { "name": "红魔馆", "description": "雾之湖畔的红恶魔馆" },
+      { "name": "白玉楼", "description": "西行妖所在的冥界宅邸" },
+      { "name": "永远亭", "description": "竹林深处隐居的月都宅邸" },
+      { "name": "守矢神社", "description": "妖怪之山的信仰据点" },
+      { "name": "命莲寺", "description": "人间之里旁的佛寺" }
+    ],
+    "characters": [
+      {"name":"博丽灵梦","rarity":"主角","nickname":"乐园的美妙巫女","affiliation":"博丽神社","role":"巫女","personality":"乐天懒散、实力深不可测","speechStyle":"大大咧咧的巫女腔，总念叨赛钱","deeds":"历代解决异变的博丽巫女","relation":"主角本人"},
+      {"name":"雾雨魔理沙","rarity":"","nickname":"普通的魔法使","affiliation":"魔法森林 · 雾雨魔法店","role":"魔法使","personality":"豪爽好胜、收藏癖","speechStyle":"男孩子气的爽快吐槽","deeds":"骑着扫帚借走（拿走）各种书的天才少女","relation":"总来找主角喝茶吵架的损友"},
+      {"name":"蕾米莉亚·斯卡蕾特","rarity":"","nickname":"永远鲜红的幼月主人","affiliation":"红魔馆","role":"吸血鬼大小姐","personality":"高贵威严、恶戏心性","speechStyle":"大小姐式的傲然宣告","deeds":"支配命运的红色恶魔，红魔馆的主人","relation":"偶尔邀请主角赴宴的贵族邻居"},
+      {"name":"芙兰朵露·斯卡蕾特","rarity":"","nickname":"恶魔之妹","affiliation":"红魔馆","role":"吸血鬼","personality":"天真烂漫、破坏成性","speechStyle":"孩子气的天真呓语","deeds":"能摧毁一切的「毁灭一切之物」","relation":"被软禁在馆内的危险妹妹"},
+      {"name":"十六夜咲夜","rarity":"","nickname":"完美潇洒的女仆","affiliation":"红魔馆","role":"女仆长","personality":"完美干练、忠诚冷静","speechStyle":"从容优雅的女仆敬语","deeds":"操控时间投掷飞刀的完美女仆","relation":"红魔馆派驻日常的完美女仆长"},
+      {"name":"帕秋莉·诺蕾姬","rarity":"","nickname":"不动的大图书馆","affiliation":"红魔馆","role":"魔女","personality":"慵懒博学、哮喘病弱","speechStyle":"简短的学者式点评","deeds":"精通七曜魔法的大图书馆","relation":"图书馆里的安静书友"},
+      {"name":"魂魄妖梦","rarity":"","nickname":"半人半灵的剑士","affiliation":"白玉楼","role":"庭师","personality":"认真率直、容易慌张","speechStyle":"武士道式的郑重应答","deeds":"挥舞楼观剑与白楼剑的少年庭师","relation":"郑重有礼的白玉楼庭师"},
+      {"name":"西行寺幽幽子","rarity":"","nickname":"亡灵公主","affiliation":"白玉楼","role":"亡灵大小姐","personality":"悠然天然、食欲无穷","speechStyle":"慢悠悠的天然发言","deeds":"千年沉眠于西行妖下的亡灵公主","relation":"请主角吃点心的冥界大小姐"},
+      {"name":"八云紫","rarity":"","nickname":"境界的妖怪","affiliation":"无所属 · 境界","role":"妖怪贤者","personality":"神秘莫测、运筹帷幄","speechStyle":"意味深长的谜语","deeds":"操纵境界、守护幻想乡的贤者","relation":"在幕后推动一切的紫妈妈"},
+      {"name":"东风谷早苗","rarity":"","nickname":"现人神的风祝","affiliation":"守矢神社","role":"风祝 · 学生","personality":"努力认真、有点冒失","speechStyle":"礼貌元气的现代口吻","deeds":"信仰不足却干劲十足的现代神明代言人","relation":"同为神社经营者、互相较劲的后辈"},
+      {"name":"铃仙·优昙华院·因幡","rarity":"","nickname":"狂气的月兔","affiliation":"永远亭","role":"玉兔","personality":"温吞认真、波及狂气","speechStyle":"轻声细语的兔耳少女","deeds":"以狂气弹幕惑乱心智的月兔","relation":"永远亭派来的安静药童"}
+    ],
+    "taboos": ["现代电子设备大量出现（外侧世界限定）", "枪械等现代武器", "打破和风幻想氛围的科技词汇"],
+    "timeNotes": "与外侧世界共享现代历法；宴会多在节日与花季举办"
+  }
+}

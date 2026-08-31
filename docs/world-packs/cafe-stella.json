@@ -1,0 +1,51 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_cafestella",
+  "name": "星光咖啡馆与死神之蝶",
+  "worldType": "cafe_shinigami_romance",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《星光咖啡馆与死神之蝶》（YUZUSOFT，Steam销量20万+、2026动画化决定）· 非官方同人参考包",
+    "description": "街角咖啡店里，少年与死神的甜蜜邂逅",
+    "era": "现代日本小城",
+    "lore": "经历了一场濒死事故的少年，意外获得了看得见「死神」的体质。在街角的「Café Stella」，他遇见了实习死神明月栞那，从此一边打工一边协助死神工作。咖啡的香气、蝴蝶的指引与恋爱的悸动，构成了这段温柔的日常。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "Steam国际中文版",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25，星光咖啡馆与死神之蝶版权归 YUZUSOFT 所有。",
+    "locations": [
+      "Café Stella 咖啡厅", "商店街", "学园", "主角的公寓", "黄昏的河堤", "死神界的入口"
+    ],
+    "transport": ["步行", "自行车", "电车"],
+    "currency": ["日元"],
+    "activities": {
+      "daily": ["清晨开店磨咖啡豆", "午高峰忙翻天的接待", "下午茶时间闲聊", "打烊后的复盘小酌", "夜里陪栞那巡逻死神任务"],
+      "work": ["咖啡制作修行", "死神工作的辅助", "寻找迷失的灵魂"],
+      "leisure": ["品尝甜点新品", "河堤散步看夕阳", "游戏厅对决"],
+      "social": ["店内员工聚餐", "学园祭"],
+      "special": ["重大死神任务的协助", "关于「死亡」真相的追查"]
+    },
+    "events": [
+      "栞那的死神工作又出包了",
+      "新研制的季节限定咖啡大受好评",
+      "一只蓝色的蝴蝶停在了窗边",
+      "常客老爷爷讲了段奇怪的往事"
+    ],
+    "terminology": {
+      "死神": "引导灵魂、处理死亡事务的存在",
+      "Café Stella": "故事舞台的街角咖啡厅",
+      "蝴蝶": "与死神相关的神秘指引"
+    },
+    "factions": [
+      { "name": "Café Stella", "description": "少年们打工的咖啡厅" },
+      { "name": "死神界", "description": "管理死亡的机构" }
+    ],
+    "characters": [
+      {"name":"主角","rarity":"主角","nickname":"见过死亡的少年","affiliation":"Café Stella","role":"店员 · 半个死神协力者","personality":"温柔可靠、有点天然呆","speechStyle":"温和的吐槽系少年","deeds":"濒死后获得看见死神的能力，成为咖啡厅的一员","relation":"主角本人"},
+      {"name":"明月栞那","rarity":"","nickname":"实习死神","affiliation":"死神界 / Café Stella","role":"死神 · 店员","personality":"认真努力、有点不自信","speechStyle":"礼貌中带着拼命三郎的可爱","deeds":"为转正而努力的实习死神，工作时常手忙脚乱","relation":"与主角签订契约共事的核心搭档"},
+      {"name":"四季夏目","rarity":"","nickname":"元气大小姐","affiliation":"Café Stella","role":"常客 · 同学","personality":"直率开朗、家境优渥","speechStyle":"明快的大小姐口吻","deeds":"美少女游戏大赏角色部门第三名的人气王","relation":"经常来店里光顾的元气同学"},
+      {"name":"墨染希","rarity":"","nickname":"文静学姐","affiliation":"学园","role":"学生","personality":"温婉安静","speechStyle":"轻声细语的学姐腔","deeds":"温柔的图书委员气质少女","relation":"学校里认识的内向学姐"}
+    ],
+    "taboos": ["血腥恐怖描写（死神设定偏治愈）", "宏大奇幻战争"],
+    "timeNotes": "咖啡厅作息：早班备料、午后高峰、夜间死神任务"
+  }
+}

@@ -1,0 +1,657 @@
+﻿import { useMemo, useState, useEffect, useRef } from 'react';
+import { useChatStore } from '../../store/chatStore';
+import { useCharacterStore } from '../../store/characterStore';
+import { useCharacterMindStore } from '../../store/characterMindStore';
+import { emotionColors, emotionLabels, normalizeEmotion } from '../../utils/constants';
+import { EmotionType } from '../../types';
+import { ArrowLeft, Clock, TrendingUp, Activity, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ParticleHeart } from './ParticleHeart';
+import { CompoundEmotionDisplay } from './CompoundEmotionDisplay';
+import { DateTimeline, getTodayStr } from '../common/DateTimeline';
+import { calcDecay } from '../../services/aiService';
+import { getDominantEmotion } from '../../utils/emotionAnalyzer';
+
+function seededRandom(seed: number): () => number {
+  let s = seed;
+  return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+}
+
+type SpecialEffect = 'none' | 'ringExpand' | 'dimGlow' | 'flash' | 'flicker' | 'shrink';
+
+interface EmotionBehavior {
+  hue: number;
+  satMul: number;
+  particleSpeed: number;
+  particleCount: number;
+  glowLayers: number;
+  glowOpacity: number;
+  breatheSpeed: number;
+  specialEffect: SpecialEffect;
+  orbitRadiusMul: number;
+}
+
+const emotionBehaviorMap: Record<string, EmotionBehavior> = {
+  anticipation:   { hue: 180, satMul: 0.65, particleSpeed: 10, particleCount: 8, glowLayers: 3, glowOpacity: 0.45, breatheSpeed: 4,   specialEffect: 'ringExpand', orbitRadiusMul: 1 },
+  joy:            { hue: 45,  satMul: 0.85, particleSpeed: 7,  particleCount: 10,glowLayers: 3, glowOpacity: 0.55, breatheSpeed: 3.5, specialEffect: 'ringExpand', orbitRadiusMul: 1.05 },
+  trust:          { hue: 140, satMul: 0.65, particleSpeed: 11, particleCount: 7, glowLayers: 2, glowOpacity: 0.4,  breatheSpeed: 4.5, specialEffect: 'none', orbitRadiusMul: 1 },
+  fear:           { hue: 260, satMul: 0.7,  particleSpeed: 8,  particleCount: 8, glowLayers: 2, glowOpacity: 0.4,  breatheSpeed: 3.5, specialEffect: 'flicker', orbitRadiusMul: 1 },
+  surprise:       { hue: 270, satMul: 0.7,  particleSpeed: 8,  particleCount: 8, glowLayers: 2, glowOpacity: 0.45, breatheSpeed: 3.5, specialEffect: 'flicker', orbitRadiusMul: 1 },
+  sadness:        { hue: 215, satMul: 0.6,  particleSpeed: 18, particleCount: 5, glowLayers: 2, glowOpacity: 0.2,  breatheSpeed: 6.5, specialEffect: 'dimGlow', orbitRadiusMul: 0.9 },
+  disgust:        { hue: 120, satMul: 0.6,  particleSpeed: 15, particleCount: 5, glowLayers: 2, glowOpacity: 0.25, breatheSpeed: 5.5, specialEffect: 'dimGlow', orbitRadiusMul: 0.9 },
+  anger:          { hue: 5,   satMul: 0.85, particleSpeed: 5,  particleCount: 10,glowLayers: 3, glowOpacity: 0.6,  breatheSpeed: 3,   specialEffect: 'flash', orbitRadiusMul: 1.1 },
+  pride:          { hue: 340, satMul: 0.7,  particleSpeed: 10, particleCount: 8, glowLayers: 2, glowOpacity: 0.45, breatheSpeed: 4,   specialEffect: 'none', orbitRadiusMul: 1 },
+  guilt:          { hue: 200, satMul: 0.5,  particleSpeed: 18, particleCount: 5, glowLayers: 2, glowOpacity: 0.2,  breatheSpeed: 6.5, specialEffect: 'dimGlow', orbitRadiusMul: 0.9 },
+  embarrassment:  { hue: 330, satMul: 0.5,  particleSpeed: 13, particleCount: 5, glowLayers: 2, glowOpacity: 0.3,  breatheSpeed: 5,   specialEffect: 'shrink', orbitRadiusMul: 0.85 },
+  jealousy:       { hue: 15,  satMul: 0.8,  particleSpeed: 6,  particleCount: 9, glowLayers: 3, glowOpacity: 0.55, breatheSpeed: 3.2, specialEffect: 'flash', orbitRadiusMul: 1.05 },
+  curiosity:      { hue: 160, satMul: 0.7,  particleSpeed: 9,  particleCount: 8, glowLayers: 2, glowOpacity: 0.4,  breatheSpeed: 4,   specialEffect: 'ringExpand', orbitRadiusMul: 1 },
+  love:           { hue: 345, satMul: 0.8,  particleSpeed: 8,  particleCount: 9, glowLayers: 3, glowOpacity: 0.5,  breatheSpeed: 3.5, specialEffect: 'ringExpand', orbitRadiusMul: 1.05 },
+  gratitude:      { hue: 35,  satMul: 0.75, particleSpeed: 9,  particleCount: 8, glowLayers: 2, glowOpacity: 0.45, breatheSpeed: 4,   specialEffect: 'none', orbitRadiusMul: 1 },
+  empathy:        { hue: 270, satMul: 0.6,  particleSpeed: 10, particleCount: 7, glowLayers: 2, glowOpacity: 0.35, breatheSpeed: 4.5, specialEffect: 'none', orbitRadiusMul: 0.95 },
+  anxiety:        { hue: 10,  satMul: 0.7,  particleSpeed: 5,  particleCount: 10,glowLayers: 3, glowOpacity: 0.5,  breatheSpeed: 2.8, specialEffect: 'flash', orbitRadiusMul: 1.05 },
+  loneliness:     { hue: 220, satMul: 0.4,  particleSpeed: 20, particleCount: 4, glowLayers: 1, glowOpacity: 0.15, breatheSpeed: 7,   specialEffect: 'dimGlow', orbitRadiusMul: 0.85 },
+  disappointment:  { hue: 230, satMul: 0.5,  particleSpeed: 17, particleCount: 5, glowLayers: 2, glowOpacity: 0.2,  breatheSpeed: 6,   specialEffect: 'dimGlow', orbitRadiusMul: 0.9 },
+};
+
+function getBehavior(emotion: EmotionType): EmotionBehavior {
+  return emotionBehaviorMap[emotion] || emotionBehaviorMap.anticipation;
+}
+
+function getEmotionColor(emotion: EmotionType, intensity: number): { hsl: string; hsla: (a: number) => string } {
+  const b = getBehavior(emotion);
+  const sat = 70 + intensity * 0.25;
+  const light = 46 + intensity * 0.15;
+  return {
+    hsl: `hsl(${b.hue}, ${sat}%, ${light}%)`,
+    hsla: (a: number) => `hsla(${b.hue}, ${sat}%, ${light}%, ${a})`,
+  };
+}
+
+function AffinityBall({ emotion, intensity }: { emotion: EmotionType; intensity: number }) {
+  const behavior = getBehavior(emotion);
+  const { hsl: color, hsla } = getEmotionColor(emotion, intensity);
+  const label = emotionLabels[emotion];
+
+  // 随机但保证最小间距的角度分布（不等距也不聚堆）
+  function spreadAngles(count: number, r: () => number, minGap: number): number[] {
+    const angles: number[] = [];
+    let attempts = 0;
+    while (angles.length < count && attempts < count * 50) {
+      const a = r() * 360;
+      const ok = angles.every(existing => {
+        const diff = Math.abs(existing - a);
+        return Math.min(diff, 360 - diff) >= minGap;
+      });
+      if (ok) angles.push(a);
+      attempts++;
+    }
+    // 兜底：如果放不下，用均分 + 随机偏移
+    while (angles.length < count) {
+      const base = (360 / count) * angles.length;
+      angles.push(base + (r() - 0.5) * minGap * 0.5);
+    }
+    return angles;
+  }
+
+  // 种子随机数据: 8外轨道 + 10散点 = 18组
+  const seeds = useMemo(() => {
+    const r = seededRandom(42);
+    const outerAngles = spreadAngles(8, r, 25);
+    const scatterAngles = spreadAngles(10, r, 20);
+    return Array.from({ length: 18 }, (_, i) => ({
+      angle: i < 8 ? outerAngles[i] : scatterAngles[i - 8],
+      size: r(),
+      radius: r(),
+      opacity: r(),
+      delay: r(),
+    }));
+  }, []);
+
+  // 强度影响
+  const intensityNorm = intensity / 100;
+  const particleScale = 0.7 + intensityNorm * 0.6; // 粒子大小缩放
+  const extraParticles = Math.round(intensityNorm * 3); // 额外粒子数
+  const glowBoost = 0.5 + intensityNorm * 0.8; // 辉光增强
+  const totalParticles = behavior.particleCount + extraParticles;
+
+  // 特殊效果样式
+  const specialStyle: React.CSSProperties = {};
+  if (behavior.specialEffect === 'shrink') {
+    specialStyle.transform = `scale(${0.88 + intensityNorm * 0.1})`;
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <div className="relative w-44 h-44" style={{ ...specialStyle, overflow: 'visible' }}>
+        {/* 外部扩散层（辉光层数随情绪变化） */}
+        {Array.from({ length: behavior.glowLayers }, (_, g) => {
+          const inset = -16 - g * 8;
+          const opacity = behavior.glowOpacity * glowBoost - g * 0.05;
+          const dur = behavior.breatheSpeed + g * 0.8;
+          return (
+            <div
+              key={`glow${g}`}
+              className="absolute rounded-full"
+              style={{
+                inset: `${inset}px`,
+                opacity: Math.max(0.05, opacity),
+                background: `radial-gradient(circle, ${color}, transparent 70%)`,
+                animation: `pulse ${dur}s ease-in-out infinite ${g * 0.4}s`,
+              }}
+            />
+          );
+        })}
+
+        {/* 特殊效果: ringExpand */}
+        {behavior.specialEffect === 'ringExpand' && (
+          <div
+            className="absolute rounded-full border"
+            style={{
+              inset: '-8px',
+              borderColor: hsla(0.3),
+              animation: `ringExpand ${behavior.breatheSpeed * 1.5}s ease-out infinite`,
+            }}
+          />
+        )}
+
+        {/* 特殊效果: flash */}
+        {behavior.specialEffect === 'flash' && (
+          <div
+            className="absolute rounded-full"
+            style={{
+              inset: '-15px',
+              background: `radial-gradient(circle, ${hsla(0.4)}, transparent 60%)`,
+              animation: `flash ${behavior.breatheSpeed * 0.6}s steps(3) infinite`,
+            }}
+          />
+        )}
+
+        {/* 特殊效果: flicker */}
+        {behavior.specialEffect === 'flicker' && (
+          <div
+            className="absolute rounded-full"
+            style={{
+              inset: '-12px',
+              background: `radial-gradient(circle, ${hsla(0.35)}, transparent 65%)`,
+              animation: `flicker ${behavior.breatheSpeed * 0.8}s steps(5) infinite`,
+            }}
+          />
+        )}
+
+        {/* 外轨道粒子 - 随机种子角度，辉光外围环绕 */}
+        <div className="absolute inset-0 flex items-center justify-center" style={{ animation: `orbit ${behavior.particleSpeed * 2}s linear infinite` }}>
+          {Array.from({ length: Math.min(totalParticles, 8) }, (_, i) => {
+            const s = seeds[i];
+            const sz = (4 + s.size * 3) * particleScale;
+            const orbit = 100 + s.radius * 30;
+            const opa = 0.55 + s.opacity * 0.4;
+            return (
+              <div
+                key={`out${i}`}
+                className="absolute rounded-full"
+                style={{
+                  width: `${sz}px`, height: `${sz}px`,
+                  backgroundColor: color,
+                  opacity: opa,
+                  boxShadow: `0 0 ${sz * 4}px ${color}, 0 0 ${sz * 8}px ${color}55`,
+                  transform: `rotate(${s.angle}deg) translateY(${-orbit}px)`,
+                }}
+              />
+            );
+          })}
+        </div>
+
+        {/* 散点粒子 - 在辉光外围漂浮 */}
+        {seeds.slice(11, 11 + Math.min(totalParticles, 10)).map((s, i) => {
+          const angle = s.angle;
+          const dist = (50 + s.radius * 30) * behavior.orbitRadiusMul;
+          const sz = (2.5 + s.size * 3) * particleScale;
+          const clusterAngle = s.angle + s.delay * 120;
+          const driftX = Math.cos(clusterAngle * Math.PI / 180) * 8;
+          const driftY = Math.sin(clusterAngle * Math.PI / 180) * 8;
+          const dur = 3 + s.delay * 4;
+          return (
+            <div
+              key={`p${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: `${sz}px`, height: `${sz}px`,
+                backgroundColor: color,
+                opacity: 0.5 + s.opacity * 0.4,
+                left: `calc(50% + ${Math.cos(angle * Math.PI / 180) * dist}px - ${sz / 2}px)`,
+                top: `calc(50% + ${Math.sin(angle * Math.PI / 180) * dist}px - ${sz / 2}px)`,
+                animation: `clusterFloat ${dur}s ease-in-out infinite`,
+                animationDelay: `${s.delay * 3}s`,
+                ['--drift-x' as string]: `${driftX}px`,
+                ['--drift-y' as string]: `${driftY}px`,
+                boxShadow: `0 0 ${sz * 4}px ${color}`,
+              }}
+            />
+          );
+        })}
+
+        {/* 球体主体 */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: `radial-gradient(circle at 35% 30%, ${color}dd, ${color}88 50%, ${color}44)`,
+            boxShadow: `0 0 60px ${color}44, 0 0 120px ${color}22, inset 0 0 40px rgba(255,255,255,0.15)`,
+            animation: 'breathe 4s ease-in-out infinite',
+          }}
+        />
+
+        {/* 内部高光 */}
+        <div
+          className="absolute inset-[15%] rounded-full"
+          style={{
+            background: `radial-gradient(circle at 40% 35%, rgba(255,255,255,0.35), transparent 60%)`,
+          }}
+        />
+
+        {/* 标签 */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+          <span className="text-xl font-bold text-white drop-shadow-lg">{label}</span>
+          <span className="text-xs text-white/70 mt-0.5">{intensity}%</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function seededHeight(i: number): number {
+  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
+  return 20 + (s - Math.floor(s)) * 80;
+}
+
+function EmotionTimeline({ records }: { records: Array<{ emotion: EmotionType; timestamp: Date }> }) {
+  const recent = useMemo(() => records.slice(0, 30).reverse(), [records]);
+
+  return (
+    <div className="flex items-end gap-1 h-24">
+      {recent.map((r, i) => (
+        <div
+          key={i}
+          className="group relative flex-1 rounded-t cursor-pointer transition-opacity hover:opacity-80"
+          style={{
+            height: i === recent.length - 1 ? '100%' : `${seededHeight(i)}%`,
+            backgroundColor: emotionColors[normalizeEmotion(r.emotion)],
+            minHeight: '4px',
+          }}
+        >
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-gray-900 text-white text-[10px] px-2 py-1 rounded-md shadow-lg z-10">
+            {emotionLabels[normalizeEmotion(r.emotion)]}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DistributionBars({ counts, total }: { counts: Record<string, number>; total: number }) {
+  const sorted = Object.entries(counts).sort(([, a], [, b]) => b - a).filter(([, c]) => c > 0);
+  if (sorted.length === 0) return <div className="text-center py-6 text-gray-400 text-sm">暂无分布数据</div>;
+  const maxCount = sorted[0]?.[1] || 1;
+
+  return (
+    <div className="space-y-3">
+      {sorted.map(([emotion, count]) => {
+        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        return (
+          <div key={emotion} className="flex items-center gap-3">
+            <div className="flex items-center gap-2 w-20 flex-shrink-0">
+              <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: emotionColors[emotion as EmotionType] }} />
+              <span className="text-xs text-gray-600 dark:text-gray-400">{emotionLabels[emotion as EmotionType]}</span>
+            </div>
+            <div className="flex-1 h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+              <div className="h-full rounded-full transition-all duration-500 ease-out" style={{ width: `${(count / maxCount) * 100}%`, backgroundColor: emotionColors[emotion as EmotionType] }} />
+            </div>
+            <span className="text-xs text-gray-500 w-12 text-right font-mono">{count}次 · {pct}%</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RecordList({ records, renderCount, sentinelRef }: {
+  records: Array<{ id: string; emotion: EmotionType; intensity: number; context: string }>;
+  renderCount: number;
+  sentinelRef: React.RefObject<HTMLDivElement>;
+}) {
+  if (records.length === 0) return <div className="text-center py-10 text-gray-400 text-sm">开始对话后会记录情感变化</div>;
+
+  const visible = records.slice(0, renderCount);
+  const hasMore = renderCount < records.length;
+
+  return (
+    <div className="space-y-2">
+      {visible.map((record) => {
+        const ne = normalizeEmotion(record.emotion);
+        return (
+          <div key={record.id} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: emotionColors[ne] + '18' }}>
+              <div className="w-4 h-4 rounded-full" style={{ backgroundColor: emotionColors[ne] }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{emotionLabels[ne]}</span>
+                <div className="h-1.5 rounded-full" style={{ width: `${Math.max(record.intensity * 0.4, 8)}px`, backgroundColor: emotionColors[ne] }} />
+                <span className="text-[10px] text-gray-400">{record.intensity}%</span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">{record.context}</p>
+            </div>
+          </div>
+        );
+      })}
+      {hasMore && (
+        <div ref={sentinelRef} className="py-4 text-center text-xs text-gray-400">
+          加载更多...
+        </div>
+      )}
+      {!hasMore && records.length > 20 && (
+        <div className="py-4 text-center text-xs text-gray-400">
+          已加载全部 {records.length} 条记录
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface EmotionData {
+  id: string;
+  emotion: EmotionType;
+  intensity: number;
+  timestamp: Date;
+  context: string;
+}
+
+export function EmotionDashboard() {
+  const records = useChatStore((s) => s.emotionRecords);
+  const currentId = useChatStore((s) => s.currentConversationId);
+  const conversations = useChatStore((s) => s.conversations);
+  const characters = useCharacterStore((s) => s.characters);
+  const navigate = useNavigate();
+  const [selectedCharId, setSelectedCharId] = useState<string>('__all__');
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayStr());
+  const [showAllDates, setShowAllDates] = useState(false);
+  const [renderCount, setRenderCount] = useState(20);
+  const recordSentinelRef = useRef<HTMLDivElement>(null);
+
+  // 当筛选条件变化时重置 renderCount
+  useEffect(() => {
+    setRenderCount(20);
+  }, [selectedCharId, selectedDate, showAllDates]);
+
+  const conversation = conversations.find(c => c.id === currentId);
+  const currentCharId = conversation?.characterId || '';
+  const emotionCharId = selectedCharId === '__all__' ? currentCharId : selectedCharId;
+
+  const charMultiEmotion = useCharacterMindStore(s => emotionCharId ? s.multiEmotions[emotionCharId] : null);
+  const dominant = charMultiEmotion ? getDominantEmotion(charMultiEmotion) : null;
+  const currentEmotion = normalizeEmotion(dominant?.type || 'anticipation');
+  const emotionIntensity = dominant?.intensity || 0;
+
+  const affinityStates = useCharacterMindStore(s => s.affinityStates);
+  const affinityLevel = useMemo(() => {
+    if (!emotionCharId) return 0;
+    const state = affinityStates[emotionCharId];
+    if (!state) return 0;
+    const lastInteraction = state.lastInteraction instanceof Date ? state.lastInteraction : new Date(state.lastInteraction);
+    const decay = calcDecay(lastInteraction, state.level, 0.5);
+    if (decay !== 0) {
+      return Math.round(Math.max(-100, Math.min(100, state.level + decay)) * 100) / 100;
+    }
+    return Math.round(state.level * 100) / 100;
+  }, [emotionCharId, affinityStates]);
+
+  const filteredRecords = useMemo(() => {
+    let result: EmotionData[];
+
+    if (selectedCharId === '__all__') {
+      result = records;
+    } else {
+      // Build a set of message contents+timestamps belonging to this character
+      const charConvIds = new Set(conversations.filter(c => c.characterId === selectedCharId).map(c => c.id));
+      const charMsgKeys = new Set<string>();
+      for (const conv of conversations) {
+        if (!charConvIds.has(conv.id)) continue;
+        for (const msg of conv.messages) {
+          if (msg.sender === 'user') {
+            // Use content + timestamp hour as a matching key
+            const ts = new Date(msg.timestamp).getTime();
+            charMsgKeys.add(`${msg.content}|${ts}`);
+          }
+        }
+      }
+
+      // Match emotion records by characterId OR by context matching
+      result = records.filter(r => {
+        if (r.characterId === selectedCharId) return true;
+        const rTime = new Date(r.timestamp).getTime();
+        for (const key of charMsgKeys) {
+          const [content, tsStr] = key.split('|');
+          const ts = Number(tsStr);
+          if (r.context === content && Math.abs(rTime - ts) < 2000) return true;
+        }
+        return false;
+      });
+    }
+
+    if (!showAllDates) {
+      const dayStart = new Date(selectedDate + 'T00:00:00');
+      const dayEnd = new Date(selectedDate + 'T00:00:00');
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      result = result.filter(r => {
+        const t = new Date(r.timestamp).getTime();
+        return t >= dayStart.getTime() && t < dayEnd.getTime();
+      });
+    }
+
+    return result;
+  }, [selectedCharId, records, conversations, selectedDate, showAllDates]);
+
+  const stats = useMemo(() => {
+    const total = filteredRecords.length;
+    const emotionCounts: Record<string, number> = {};
+    for (const r of filteredRecords) {
+      const normalized = normalizeEmotion(r.emotion);
+      emotionCounts[normalized] = (emotionCounts[normalized] || 0) + 1;
+    }
+    const dominant = Object.entries(emotionCounts).sort(([, a], [, b]) => b - a)[0];
+
+    let spanMin = 0;
+    if (total > 1) {
+      const timestamps = filteredRecords.map(r => new Date(r.timestamp).getTime());
+      const minTime = Math.min(...timestamps);
+      const maxTime = Math.max(...timestamps);
+      spanMin = Math.round((maxTime - minTime) / (1000 * 60));
+    }
+
+    return { total, emotionCounts, dominant, spanMin };
+  }, [filteredRecords]);
+
+  const charOptions = useMemo(() => {
+    const used = new Set(conversations.map(c => c.characterId).filter(Boolean));
+    return characters.filter(c => used.has(c.id));
+  }, [characters, conversations]);
+
+  useEffect(() => {
+    const id = 'emotion-dashboard-keyframes';
+    if (document.getElementById(id)) return undefined;
+    const style = document.createElement('style');
+    style.id = id;
+    style.textContent = `
+      @keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      @keyframes float { 0%,100%{transform:translate(0,0) scale(1);opacity:0.3} 50%{transform:translate(0,-6px) scale(1.3);opacity:0.6} }
+      @keyframes clusterFloat { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(var(--drift-x,3px),var(--drift-y,-3px)) scale(1.4)} }
+      @keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
+      @keyframes pulse { 0%,100%{opacity:var(--pulse-min,0.15)} 50%{opacity:var(--pulse-max,0.35)} }
+      @keyframes ringExpand { 0%{transform:scale(0.8);opacity:0.5} 100%{transform:scale(1.6);opacity:0} }
+      @keyframes flash { 0%{opacity:0.5} 33%{opacity:0.1} 66%{opacity:0.6} 100%{opacity:0.2} }
+      @keyframes flicker { 0%{opacity:0.4} 20%{opacity:0.1} 40%{opacity:0.5} 60%{opacity:0.15} 80%{opacity:0.45} 100%{opacity:0.3} }
+    `;
+    document.head.appendChild(style);
+    return () => { style.remove(); };
+  }, []);
+
+  // 情感记录无限滚动
+  useEffect(() => {
+    const sentinel = recordSentinelRef.current;
+    if (!sentinel) return undefined;
+    if (renderCount >= filteredRecords.length) return undefined;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setRenderCount((prev) => prev + 20);
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [renderCount, filteredRecords.length]);
+
+  return (<div className="flex-1 min-h-0 bg-gray-50 dark:bg-gray-950 overflow-y-auto">
+      <div className="max-w-2xl mx-auto px-4 pt-6">
+        <div className="flex items-center gap-3 mb-3">
+          <button onClick={() => navigate('/chat')} className="p-2.5 rounded-xl bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-all shrink-0">
+            <ArrowLeft size={18} />
+          </button>
+          <div>
+            <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">情感面板</h1>
+            <p className="text-xs text-gray-500">实时情绪状态</p>
+          </div>
+        </div>
+
+        {charOptions.length > 0 && (
+            <div className="flex gap-1.5 overflow-x-auto py-1 px-1">
+            <button
+              onClick={() => setSelectedCharId('__all__')}
+              className={`px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all shrink-0 border ${
+                selectedCharId === '__all__'
+                  ? 'border-slate-400 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/20 text-slate-800 dark:text-slate-400 font-medium'
+                  : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
+              }`}
+            >
+              全部
+            </button>
+            {charOptions.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setSelectedCharId(c.id)}
+                className={`px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all shrink-0 border ${
+                  selectedCharId === c.id
+                    ? 'border-slate-400 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/20 text-slate-800 dark:text-slate-400 font-medium'
+                    : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Date Timeline */}
+        <div className="mb-5">
+          <DateTimeline
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+            showAll={true}
+            showAllMode={showAllDates}
+            onToggleAll={() => setShowAllDates(!showAllDates)}
+          />
+        </div>
+
+        {/* Affinity Ball */}
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm p-8 mb-5 overflow-hidden min-h-[340px] flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity size={14} className="text-slate-700 dark:text-slate-300" />
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">当前情绪</h2>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <AffinityBall emotion={currentEmotion} intensity={emotionIntensity} />
+          </div>
+        </div>
+
+        {/* Compound Emotions */}
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm p-5 mb-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles size={14} className="text-slate-700 dark:text-slate-300" />
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">情绪合成</h2>
+            <span className="text-[10px] text-gray-400 ml-auto">基础 → 高级</span>
+          </div>
+          <CompoundEmotionDisplay multiEmotionState={charMultiEmotion} />
+        </div>
+
+        {/* Affinity Heart */}
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm p-8 mb-5 overflow-visible relative flex flex-col items-center min-h-[340px]">
+          <div className="self-stretch relative z-10 flex items-center gap-2 mb-6">
+            <div className="w-3.5 h-3.5 rounded-full bg-pink-500" />
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">好感度</h2>
+            <span className="text-[10px] text-gray-400 ml-auto">心跳 × 关系</span>
+          </div>
+          <div className="w-full flex-1 flex items-center justify-center" style={{ minHeight: 0 }}>
+            {/* 🆕 传入当前情绪：心率/心电图/心跳随情绪与对话动态起伏 */}
+            <ParticleHeart
+              progress={Math.max(0, affinityLevel)}
+              emotionType={currentEmotion}
+              emotionIntensity={emotionIntensity}
+            />
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm p-4 text-center">
+            <div className="text-3xl font-black text-gray-900 dark:text-gray-100">{stats.total}</div>
+            <div className="text-[11px] text-gray-500 mt-1">记录总数</div>
+          </div>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm p-4 text-center">
+            <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              {/* 🆕 修复：用当前多维情绪状态的主导（与下方多维情绪面板一致），而非历史记录计数 */}
+              {currentEmotion && emotionIntensity > 0
+                ? `${emotionLabels[currentEmotion] || currentEmotion} ${emotionIntensity}%`
+                : (stats.dominant ? emotionLabels[normalizeEmotion(stats.dominant[0])] : '-')}
+            </div>
+            <div className="text-[11px] text-gray-500 mt-1">主导情绪</div>
+          </div>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm p-4 text-center">
+            <div className="text-3xl font-black text-gray-900 dark:text-gray-100">
+              {stats.total < 2 ? '-' : stats.spanMin < 60 ? `${stats.spanMin}m` : `${Math.round(stats.spanMin / 60)}h`}
+            </div>
+            <div className="text-[11px] text-gray-500 mt-1">时间跨度</div>
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm p-5 mb-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock size={14} className="text-slate-700 dark:text-slate-300" />
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">情绪走势</h2>
+            <span className="text-[10px] text-gray-400 ml-auto">最近30条</span>
+          </div>
+          <EmotionTimeline records={filteredRecords} />
+        </div>
+
+        {/* Distribution */}
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm p-5 mb-5">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp size={14} className="text-slate-700 dark:text-slate-300" />
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">情绪分布</h2>
+          </div>
+          <DistributionBars counts={stats.emotionCounts} total={stats.total} />
+        </div>
+
+        {/* Records */}
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm p-5 pb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">最近记录</h2>
+            <span className="text-[10px] text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">{filteredRecords.length}</span>
+          </div>
+          <RecordList records={filteredRecords} renderCount={renderCount} sentinelRef={recordSentinelRef} />
+        </div>
+      </div>
+    </div>
+  );
+}

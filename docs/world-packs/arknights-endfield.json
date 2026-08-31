@@ -1,0 +1,98 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_endfield",
+  "name": "终末地 · 塔卫二拓荒",
+  "worldType": "industrial_frontier",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《明日方舟：终末地》（Hypergryph / 鹰角网络）· 非官方同人参考包",
+    "description": "在塔卫二的荒野上铺设工业、开拓新家园",
+    "era": "人类远征塔卫二行星的拓荒纪元，武陵等新开拓区相继建立",
+    "lore": "在遥远行星「塔卫二」，终末地工业承担着为母星开辟新家园的使命。管理员带领工程团队深入荒野：铺设自动化产线、开采矿脉、建立前哨站，同时应对野生战兽的袭扰与天灾的威胁。随着开拓深入，东境山野间的新区域「武陵」已设立据点与实验园区，钢铁机械与荒原落日构成这片土地的日常。",
+    "statsAsOf": "2026-08-24",
+    "gameVersion": "向渊行",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-24（版本「向渊行」），游戏名称、角色与设定版权归 Hypergryph/鹰角网络 所有。",
+    "locations": [
+      "尖山基地", "帝江号（移动旗舰）", "基地指挥中心", "员工宿舍区", "食堂",
+      "环山区矿场", "自动采矿作业面", "佩尔罗塔工业中心",
+      "阿卡特兰聚落", "货运铁路沿线", "野外拓荒营地",
+      "武陵·应龙关", "武陵·首墩", "武陵实验园区", "盈天台建设站", "禁区边缘勘探点"
+    ],
+    "transport": [
+      "步行",
+      "摩托车",
+      "工程载具",
+      "货运列车（自动物流线）",
+      "帝江号舰内通勤",
+      "运输卡车"
+    ],
+    "currency": ["信用点"],
+    "activities": {
+      "daily": ["参加基地晨会", "检查自动化产线运行报告", "食堂用餐", "工业设施例行巡检", "宿舍休整"],
+      "work": ["驾驶工程载具开荒铺路", "铺设自动采矿线路", "讨伐袭扰的野生战兽", "护送物资列车"],
+      "leisure": ["基地健身房训练", "喝一杯合成咖啡", "湖边钓鱼", "给装备喷个性涂装"],
+      "social": ["基地联欢晚会", "与阿卡特兰聚落贸易互访", "新成员欢迎会"],
+      "special": ["天灾预警下的设备转移", "紧急抢修受损产线", "深入禁区勘探"]
+    },
+    "events": [
+      "一台作业机器人卡在了铁轨上",
+      "矿脉探测仪发现了富集区信号",
+      "夜里红外围栏捕捉到战兽靠近的身影",
+      "阿卡特兰商人带来了一批稀有零件"
+    ],
+    "terminology": {
+      "塔卫二": "人类拓荒的目标行星",
+      "终末地工业": "负责行星开发工程的巨型企业",
+      "管理员": "基地的最高管理者，塔卫二历史上多次拯救居民的传说人物",
+      "帝江号": "终末地工业的移动旗舰，佩丽卡负责管理",
+      "协议源石技术": "终末地工业开发应用的核心源石技术体系",
+      "自动工业系统": "可远程铺设的无人生产线",
+      "武陵": "塔卫二东境的新开拓区，据点与建设站遍布山野",
+      "干员职能": "突击/施术单元/近卫/先锋/重装/辅助六大职能体系",
+      "异常状态连携": "近卫施加物理异常、术士施加法术异常并联动引爆的战斗机制",
+      "天灾": "席卷地表的自然灾害"
+    },
+    "factions": [
+      { "name": "终末地工业", "description": "塔卫二开发的主导方" },
+      { "name": "危机处理小组", "description": "终末地工业的一线应急团队" },
+      { "name": "阿卡特兰", "description": "当地独立聚落联盟" },
+      { "name": "佩尔罗塔", "description": "区域工业枢纽城市" },
+      { "name": "武陵建设署", "description": "武陵地区的开拓管理机构" }
+    ],
+    "characters": [
+      {"name":"管理员","rarity":"主角","nickname":"塔卫二的传说","affiliation":"终末地工业","role":"基地最高负责人","personality":"冷静务实、深受团队信赖","speechStyle":"言简意赅，决策果断","deeds":"塔卫二有文字记载以来多次率民抵御灾难的传说人物","relation":"主角本人"},
+      {"name":"安德烈","rarity":"NPC","nickname":"首席工程师","affiliation":"终末地工业","role":"首席工程师","personality":"严谨专注","speechStyle":"技术宅式的细致讲解","deeds":"主持基建工程的首席工程师，常年驻守一线","relation":"管理员最倚重的技术支柱"},
+      {"name":"佩丽卡","rarity":"5★","nickname":"官方发言人","affiliation":"终末地工业","role":"监督 · 官方发言人","personality":"专业干练、清冷高贵","speechStyle":"优雅得体的公关腔，汇报条理分明","deeds":"推动协议源石技术落地，掌管移动旗舰帝江号","relation":"管理员的左右手，帝江号的实际管理者"},
+      {"name":"陈千语","rarity":"5★","nickname":"乐天侠客","affiliation":"终末地工业 · 危机处理小组","role":"核心干员","personality":"天生乐天派、仗剑游历的热情侠客","speechStyle":"爽朗爱笑，遇到困难先冲再说","deeds":"只身仗剑游历塔卫二数年，受邀加入终末地","relation":"与管理员并肩闯荡的核心战友"},
+      {"name":"莱万汀","rarity":"6★","nickname":"熔火之心","affiliation":"终末地工业","role":"熔火体系法术输出核心","personality":"炽热自信、战意昂扬","speechStyle":"热烈张扬，如烈焰般直率","deeds":"以【灼热附着】为核心的法术主C","relation":"熔火体系的绝对核心"},
+      {"name":"伊冯","rarity":"6★","nickname":"寒冰女王","affiliation":"终末地工业","role":"冰队体系核心","personality":"理性冷冽、精确高效","speechStyle":"简洁冷静，像精密仪器般可靠","deeds":"循环冰队的绝对核心","relation":"冰队战术的基石"},
+      {"name":"洁尔佩塔","rarity":"6★","nickname":"全能六星","affiliation":"终末地工业","role":"六星干员","personality":"沉稳可靠","speechStyle":"简练的专业表述","deeds":"辉光庆典池常客的全能干员","relation":"值得信赖的全能队友"},
+      {"name":"艾尔黛拉","rarity":"6★","nickname":"医疗天使","affiliation":"终末地工业","role":"医疗辅助","personality":"温柔细心、有点爱操心","speechStyle":"柔和的医护腔，叮嘱个不停","deeds":"战技连携终结技三重治疗的后勤支柱","relation":"守护全队生命的后勤支柱"},
+      {"name":"余烬","rarity":"6★","nickname":"沉默之刃","affiliation":"终末地工业","role":"六星干员","personality":"外冷内热、背负过往","speechStyle":"低缓克制，偶露锋芒","deeds":"多期卡池在列的高人气干员","relation":"话不多却总在关键时刻出力的伙伴"},
+      {"name":"黎风","rarity":"6★","nickname":"老兵剑客","affiliation":"终末地工业","role":"近卫干员","personality":"沉稳老练、剑术精湛","speechStyle":"简练从容，老兵式的提点","deeds":"近战输出的中坚力量","relation":"如导师般提点新人的老练剑士"},
+      {"name":"别礼","rarity":"6★","nickname":"关键一刀","affiliation":"终末地工业","role":"近卫干员","personality":"沉静内敛、行动精准","speechStyle":"话不多，句句落在关键处","deeds":"社区攻略高频推荐的核心干员","relation":"安静可靠的近战核心"},
+      {"name":"骏卫","rarity":"6★","nickname":"不动壁垒","affiliation":"终末地工业","role":"重装干员","personality":"坚毅可靠、寸步不退","speechStyle":"军令式短句","deeds":"架盾掩护队友反击的重装壁垒","relation":"为全队挡下伤害的铁壁"},
+      {"name":"訣","rarity":"6★","nickname":"武陵侠士","affiliation":"终末地工业 · 武陵方向","role":"六星干员","personality":"古风沉静、武艺高强","speechStyle":"文雅简练的侠士口吻","deeds":"「临渊望北」卡池主推的新锐干员","relation":"武陵而来的强力新伙伴"},
+      {"name":"卡缪","rarity":"6★","nickname":"优雅强者","affiliation":"终末地工业","role":"六星干员","personality":"优雅从容","speechStyle":"轻描淡写的自信","deeds":"向渊行版本实装的强力干员","relation":"举重若轻的强力队友"},
+      {"name":"弭弗","rarity":"6★","nickname":"灵动新星","affiliation":"终末地工业","role":"六星干员","personality":"灵动聪慧","speechStyle":"跳跃活泼的发言","deeds":"向渊行版本实装的强力干员","relation":"活力四射的新晋队友"},
+      {"name":"梨诺","rarity":"6★","nickname":"晨星","affiliation":"终末地工业","role":"六星干员","personality":"明亮坚定","speechStyle":"清脆利落的应答","deeds":"「晨星於此閃耀」卡池主推的新锐干员","relation":"如晨星般照亮队伍的新人"},
+      {"name":"庄方宜","rarity":"6★","nickname":"武陵管代","affiliation":"终末地工业 · 武陵","role":"武陵管代","personality":"克制坚韧、业务能力突出","speechStyle":"公事公办中藏着温度","deeds":"春晓时版本化身空中形态支援决战，改革效率惊人的地方主官","relation":"与管理员共渡决战的武陵地方主官"},
+      {"name":"洛茜","rarity":"6★","nickname":"小红帽","affiliation":"终末地工业","role":"干员","personality":"元气勇敢","speechStyle":"明快的冒险家口吻","deeds":"人称「小红帽」，拥有专属个人线故事","relation":"元气满满的冒险伙伴"},
+      {"name":"汤汤","rarity":"6★","nickname":"活力弹","affiliation":"终末地工业","role":"干员","personality":"软萌好动","speechStyle":"叽叽喳喳的热闹语气","deeds":"春晓时版本同期的活力新星","relation":"队伍里的开心果"},
+      {"name":"秋栗","rarity":"5★","nickname":"技力调度员","affiliation":"终末地工业","role":"先锋干员","personality":"元气勤快、团队润滑剂","speechStyle":"活泼利落，报点式沟通","deeds":"连携与终结技回复技力的循环发动机","relation":"让全队技能转起来的后勤小能手"},
+      {"name":"弧光","rarity":"5★","nickname":"电磁速攻","affiliation":"终末地工业","role":"干员","personality":"迅捷果敢","speechStyle":"短促的战术确认","deeds":"电磁体系的速攻手","relation":"雷厉风行的速攻手"},
+      {"name":"阿列什","rarity":"5★","nickname":"野外多面手","affiliation":"终末地工业","role":"干员","personality":"温和坚毅","speechStyle":"平和的鼓励式发言","deeds":"野外作业的多面手","relation":"随叫随到的可靠帮手"},
+      {"name":"狼卫","rarity":"5★","nickname":"灼热先锋","affiliation":"终末地工业","role":"灼热特化干员","personality":"悍勇直率、冲锋在前","speechStyle":"粗犷豪迈的战士腔","deeds":"为敌人叠加【灼热】层数，配合莱万汀引爆战场","relation":"冲锋在前的悍勇战友"},
+      {"name":"赛希","rarity":"5★","nickname":"精密作业者","affiliation":"终末地工业","role":"干员","personality":"安静专注","speechStyle":"细声细气的汇报","deeds":"精密作业的好手","relation":"安静可靠的精细活担当"},
+      {"name":"昼雪","rarity":"5★","nickname":"寒霜拼图","affiliation":"终末地工业","role":"干员","personality":"清冷淡然","speechStyle":"简洁的寒暄","deeds":"寒冷体系的重要拼图","relation":"冷静自持的冰系同伴"},
+      {"name":"埃特拉","rarity":"5★","nickname":"基建帮手","affiliation":"终末地工业","role":"干员","personality":"朴实热心","speechStyle":"乡土味的爽朗招呼","deeds":"基建后勤的可靠帮手","relation":"基地建设的好帮手"},
+      {"name":"艾维文娜","rarity":"5★","nickname":"研究骨干","affiliation":"终末地工业","role":"干员","personality":"知性优雅","speechStyle":"条理清晰的分析","deeds":"研究部门的骨干干员","relation":"研究部的知性同事"},
+      {"name":"大潘","rarity":"5★","nickname":"工地顶梁柱","affiliation":"终末地工业","role":"干员","personality":"憨厚乐观","speechStyle":"大嗓门的实在话","deeds":"工地上的顶梁柱","relation":"任劳任怨的老实人"},
+      {"name":"安塔尔","rarity":"5★","nickname":"外围哨兵","affiliation":"终末地工业","role":"干员","personality":"沉默警觉","speechStyle":"极短的警戒通报","deeds":"外围巡逻的哨兵担当","relation":"守夜警戒的沉默哨兵"},
+      {"name":"卡契尔","rarity":"5★","nickname":"谈判专家","affiliation":"终末地工业","role":"干员","personality":"冷静精明","speechStyle":"谈判桌式的措辞","deeds":"攻略社区热议的培养对象","relation":"精明的交涉好手"},
+      {"name":"萤石","rarity":"5★","nickname":"勘探行家","affiliation":"终末地工业","role":"干员","personality":"晶莹剔透的小性子","speechStyle":"直率的小抱怨","deeds":"矿石勘探的行家","relation":"矿脉勘探的行家里手"}
+    ],
+    "taboos": ["现代互联网流行梗", "与工业科幻违和的魔法词汇", "其他游戏的地名与名词"],
+    "timeNotes": "行星标准时24小时制；天灾季候会影响户外作业窗口期"
+  }
+}

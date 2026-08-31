@@ -1,0 +1,56 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_roco",
+  "name": "洛克王国：世界 · 精灵大陆",
+  "worldType": "pet_adventure",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《洛克王国：世界》（腾讯，2026年3月公测）· 非官方同人参考包",
+    "description": "开放世界的精灵收集大陆，小洛克的冒险日常",
+    "era": "人类与精灵和谐共处的魔法大陆纪元",
+    "lore": "在这片魔法与精灵共存的大陆上，人们与名为「精灵」的奇妙生物结伴生活。年轻的训练家们踏上旅程：探索草原、火山、雪山与海岸，捕捉并结识形形色色的精灵——原色、异色乃至炫彩的稀有个体藏在世界各个角落。收集、培养、对战，还有无数温暖的相遇在等待。",
+    "statsAsOf": "2026-08-24",
+    "gameVersion": "S3赛季",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-24（S3），洛克王国IP及设定版权归腾讯所有。",
+    "locations": [
+      "魔法学院", "起始草原", "维苏威火山", "雪人谷雪山", "海岸线沙滩",
+      "宠物园", "商业街", "精灵竞技场"
+    ],
+    "transport": ["步行", "骑乘精灵", "飞艇", "魔法传送"],
+    "currency": ["洛克贝"],
+    "activities": {
+      "daily": ["清晨喂食精灵", "外出探索新区域", "精灵训练对战", "集市淘稀有道具", "篝火营地休息"],
+      "work": ["完成委托任务", "参加竞技场比赛", "协助研究员调查精灵生态"],
+      "leisure": ["精灵图鉴整理", "钓鱼与采集", "拍照记录异色精灵"],
+      "social": ["训练家交流会", "节日庆典活动"],
+      "special": ["传说精灵目击事件", "团体战（如龙息帕尔）"]
+    },
+    "events": [
+      "草丛里闪过一道异色的光",
+      "春花兔成群路过营地",
+      "罗隐首领出现在山谷深处",
+      "学院的精灵们集体越狱偷吃点心"
+    ],
+    "terminology": {
+      "精灵": "大陆上与人类共生的奇妙生物",
+      "异色": "极为稀有的配色变种精灵",
+      "炫彩": "更加罕见的特殊个体",
+      "训练家": "捕捉与培养精灵的冒险者",
+      "小洛克": "对年轻冒险者的爱称"
+    },
+    "factions": [
+      { "name": "魔法学院", "description": "培养训练家的最高学府" },
+      { "name": "训练家协会", "description": "连接全大陆训练家的组织" }
+    ],
+    "characters": [
+      {"name":"小洛克","rarity":"主角","nickname":"新手训练家","affiliation":"魔法学院","role":"见习训练家","personality":"好奇心旺盛、勇敢善良","speechStyle":"元气满满的少年口吻","deeds":"从学院出发踏遍大陆收集精灵的新人","relation":"主角本人"},
+      {"name":"迪莫","rarity":"","nickname":"国民萌宠","affiliation":"无固定","role":"人气精灵","personality":"呆萌忠诚","speechStyle":"软软的叫声「迪莫～」","deeds":"洛克王国最具代表性的吉祥物精灵","relation":"许多训练家梦想遇见的传说萌宠"},
+      {"name":"火花","rarity":"","nickname":"火系初代伙伴","affiliation":" starter 三主宠","role":"初始精灵","personality":"热血冲动","speechStyle":"噼啪作响的火星叫声","deeds":"经典三主宠之一，火焰的小勇者","relation":"许多小洛克的第一只伙伴"},
+      {"name":"喵喵","rarity":"","nickname":"草系初代伙伴","affiliation":"starter 三主宠","role":"初始精灵","personality":"傲娇优雅","speechStyle":"高冷的喵叫","deeds":"经典三主宠之一，草丛中的优雅猎手","relation":"挑食但可靠的初始伙伴"},
+      {"name":"水蓝蓝","rarity":"","nickname":"水系初代伙伴","affiliation":"starter 三主宠","role":"初始精灵","personality":"温柔胆小","speechStyle":"咕噜噜的水泡声","deeds":"经典三主宠之一，治愈系的水精灵","relation":"温柔治愈型初始伙伴"},
+      {"name":"格里芬院长","rarity":"","nickname":"魔法学院院长","affiliation":"魔法学院","role":"院长","personality":"睿智慈祥","speechStyle":"长者式的谆谆教诲","deeds":"守护学院百年的大魔导师","relation":"指引小洛克踏上旅程的恩师"}
+    ],
+    "taboos": ["黑暗残酷描写（基调明快合家欢）", "现代都市科技"],
+    "timeNotes": "大陆通用昼夜循环；精灵出没随季节变化"
+  }
+}

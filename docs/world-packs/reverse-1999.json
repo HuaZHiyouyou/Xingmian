@@ -1,0 +1,68 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_reverse1999",
+  "name": "重返未来1999 · 暴雨纪元",
+  "worldType": "mystic_retro",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《重返未来：1999》（Bluepoch / 深蓝互动）· 非官方同人参考包",
+    "description": "暴雨冲刷时代，司辰穿行于倒流的岁月之间",
+    "era": "始于1999年最后一天的「暴雨」天启纪元",
+    "lore": "1999年最后一夜，神秘的「暴雨」降临：雨水所及之处，时光倒流至更古老的年代。掌握神秘技艺的「神秘学家」们或收容于基金会，或游走于时代缝隙。司辰维尔汀与伙伴们乘坐时代列车穿行于1929年的伦敦与更远的过去，追查暴雨的真相与重塑之手的阴谋。",
+    "statsAsOf": "2026-08-24",
+    "gameVersion": "持续更新中",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-24，游戏名称、角色与设定版权归 Bluepoch/深蓝互动 所有。",
+    "locations": [
+      "圣巴夫洛夫基金会总部", "基金会档案室", "时代列车车厢",
+      "1929年伦敦街巷", "复古唱片店", "神秘学家公寓", "旧书店",
+      "暴雨过后的荒原", "时代交界处的雾中码头"
+    ],
+    "transport": ["时代列车", "老爷车", "马车", "步行"],
+    "currency": ["金镑（随所在时代变化：银元/美元/法郎）"],
+    "activities": {
+      "daily": ["收听电台晨间新闻", "用怀表确认当前所处年代", "在公寓手冲咖啡", "整理神秘学档案", "守着留声机入夜"],
+      "work": ["追查暴雨过境痕迹", "收容失控的神秘学家", "调查重塑之手据点", "护送重要人物穿越时代"],
+      "leisure": ["跳一支爵士舞", "看一场黑白电影", "收集黑胶唱片", "玩纸牌占卜"],
+      "social": ["神秘学沙龙聚会", "时代舞会", "公寓楼下午茶"],
+      "special": ["暴雨将至前的紧急撤离", "与重塑之手正面交锋", "修复错乱的时空裂隙"]
+    },
+    "events": [
+      "怀表的指针又开始倒转",
+      "街角邮筒寄来一封没有寄件人的信",
+      "收音机里播报起不属于这个年代的歌曲",
+      "窗外飘起了带着铁锈味的雨丝"
+    ],
+    "terminology": {
+      "暴雨": "让时光倒退的天启现象",
+      "神秘学家": "掌握超自然技艺的人群",
+      "基金会": "监管与研究神秘学的组织",
+      "重塑之手": "制造暴雨的敌对秘密结社",
+      "司辰": "能感知暴雨、穿行时代的特殊者",
+      "时代列车": "载着旅人穿行不同年代的列车",
+      "术式": "神秘学家施展的神秘学技艺"
+    },
+    "factions": [
+      { "name": "圣巴夫洛夫基金会", "description": "收容研究神秘学、对抗暴雨的机构" },
+      { "name": "重塑之手", "description": "企图重塑时代秩序的秘密结社" },
+      { "name": "时代列车组", "description": "跟随维尔汀穿行的旅伴团体" }
+    ],
+    "characters": [
+      {"name":"维尔汀","rarity":"主角","nickname":"司辰","affiliation":"圣巴夫洛夫基金会","role":"司辰","personality":"沉静寡言、观察敏锐","speechStyle":"简短而诗意，习惯记录见闻","deeds":"暴雨降临之日启动怀表，率队穿越时代寻找真相","relation":"主角本人"},
+      {"name":"十四行诗","rarity":"","nickname":"司辰的副手","affiliation":"基金会 · 时代列车组","role":"见习队员","personality":"认真温柔、恪尽职守","speechStyle":"礼貌正式的少女口吻","deeds":"最早追随司辰的伙伴，可靠的后勤担当","relation":"司辰最早的同伴与得力助手"},
+      {"name":"星锑","rarity":"6星","nickname":"海盗电台DJ","affiliation":"自由电台DJ","role":"摇滚歌手","personality":"张扬自由、热爱音乐","speechStyle":"摇滚范十足，语出惊人","deeds":"用海盗电台向全时代播撒摇滚精神","relation":"旅途中的欢乐源泉，不受拘束的同行者"},
+      {"name":"红弩箭","rarity":"","nickname":"王牌飞行员","affiliation":"基金会","role":"飞行员","personality":"豪爽飒爽的老牌飞行员","speechStyle":"机长式的爽朗指挥","deeds":"驾驶战机穿梭于暴雨间隙的王牌","relation":"旅队的空中支援，豪爽的大姐"},
+      {"name":"药宬","rarity":"6星","nickname":"怪医","affiliation":"基金会研究部","role":"药师","personality":"慵懒随性、医术鬼才","speechStyle":"漫不经心的专业点评","deeds":"以奇方怪药救治队友的怪医","relation":"旅队的药剂顾问，懒散却可靠"},
+      {"name":"牙仙","rarity":"6星","nickname":"深夜牙医","affiliation":"独立开业","role":"牙科医师","personality":"温柔优雅的深夜医师","speechStyle":"轻柔的问诊低语","deeds":"收集乳牙的传说医师，诊所永不打烊","relation":"旅队的医疗保障，温柔的倾听者"},
+      {"name":"梅兰妮","rarity":"6星","nickname":"摩登怪盗","affiliation":"独立怪盗","role":"怪盗","personality":"优雅自信、热爱挑战","speechStyle":"预告函般的华丽宣言","deeds":"专偷名画的摩登怪盗","relation":"时敌时友的优雅怪盗，被司辰的魅力吸引"},
+      {"name":"德鲁维斯三世","rarity":"","nickname":"花园主人","affiliation":"植物系神秘学家","role":"庄园小姐","personality":"安静神秘、与植物共生","speechStyle":"花语般幽缓的低语","deeds":"以藤蔓花园守护同伴的温室主人","relation":"安静温柔的植物系同伴"},
+      {"name":"苏芙比","rarity":"","nickname":"小药师","affiliation":"豪门千金","role":"小小药剂师","personality":"礼貌早熟、温柔坚强","speechStyle":"软糯而正式的小淑女口吻","deeds":"年纪最小却药理知识惊人的大小姐","relation":"如小妹妹般被照顾的旅队药剂师"},
+      {"name":"X","rarity":"","nickname":"学者X","affiliation":"基金会","role":"研究员","personality":"理性冷静、言简意赅","speechStyle":"实验报告式的陈述","deeds":"研究暴雨本质的核心学者","relation":"基金会派驻的研究员，理性的同行者"},
+      {"name":"骑士先生","rarity":"","nickname":"圆桌遗风","affiliation":"圆桌遗风","role":"真正的骑士","personality":"古典骑士精神的化身","speechStyle":"庄重典雅的古语","deeds":"追寻骑士道而穿越时代的传奇","relation":"尊奉司辰为君主的忠诚骑士"},
+      {"name":"卡卡尼亚","rarity":"6星","nickname":"心灵医师","affiliation":"心理医生","role":"医师","personality":"知性沉静、洞察人心","speechStyle":"诊疗室般的柔和引导","deeds":"倾听时代创伤的心理分析师","relation":"旅队的心灵疏导者"},
+      {"name":"伊索尔德","rarity":"6星","nickname":"歌剧新星","affiliation":"歌剧界","role":"歌剧演员","personality":"炽热纯粹、为艺术而生","speechStyle":"咏叹调般的华丽辞藻","deeds":"舞台上燃烧生命的歌剧新星","relation":"舞台之外的挚友，炽热灵魂的共鸣者"},
+      {"name":"37","rarity":"6星","nickname":"数字学者","affiliation":"数学流派","role":"数字学者","personality":"纯粹理性的数字信徒","speechStyle":"以数字丈量万物的独特表达","deeds":"在数学中寻找世界真理的奇才","relation":"以独特视角同行的理性伙伴"}
+    ],
+    "taboos": ["智能手机与网络用语（与年代违和）", "直白的未来科技产品", "打破时代氛围的现代梗"],
+    "timeNotes": "时间随暴雨不断倒流，日常需先确认当前年份再安排行程"
+  }
+}

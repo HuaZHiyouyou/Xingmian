@@ -1,0 +1,54 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_fate_sf",
+  "name": "Fate/strange Fake · 雪原圣杯战争",
+  "worldType": "holy_grail_fake",
+  "isBuiltin": true,
+  "config": {
+    "source": "小说·动画《Fate/strange Fake》（成田良悟，TV动画Niconico冬季人气第二）· 非官方同人参考包",
+    "description": "美国雪菲尔德市爆发的虚假却真实的圣杯战争",
+    "era": "现代美国，第三次圣杯战争七十年后",
+    "lore": "在大洋彼岸的美国内华达州雪菲尔德市，一群魔术师模仿冬木市的仪式，企图举办一场「虚假」的圣杯战争——然而不完整的仪式召唤出了不完整的职阶与失控的英灵，假戏成真。七骑（或更多）从者与御主在这座沙漠之城展开乱战，世界的命运悬于一线。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "TV系列播出中",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25，Fate/strange Fake版权归 成田良悟/TYPE-MOON/Aniplex/A-1 Pictures 所有。",
+    "locations": [
+      "雪菲尔德市", "市中心大教堂", "警察局特别搜查部", "郊区魔术工房",
+      "地下下水道战场", "机场废墟", "魔法协会监视据点"
+    ],
+    "transport": ["汽车", "步行", "从者高速机动"],
+    "currency": ["美元"],
+    "activities": {
+      "daily": ["侦察敌方从者动向", "与御主制定作战计划", "收集圣杯战争情报", "在城市里隐藏身份生活", "夜间遭遇战"],
+      "work": ["祓除失控的暗杀者", "保护或猎杀其他御主", "调查虚假仪式的真相"],
+      "leisure": ["品尝美国汉堡", "参观城市景点", "和从者闲聊过去的故事"],
+      "social": ["阵营间的秘密会谈", "临时同盟的餐叙"],
+      "special": ["多阵营混战的大规模夜战", "「虚假」圣杯的真面目揭露"]
+    },
+    "events": [
+      "又一位从者在市区现身引发骚动",
+      "警方在案发现场发现了无法解释的伤痕",
+      "某个阵营的秘密会议被第三方窃听",
+      "狮子王在餐厅点了十人份的牛排"
+    ],
+    "terminology": {
+      "圣杯战争": "七组御主与从者的争夺战",
+      "令咒": "绝对命令从者的三次权力印记",
+      "伪圣杯战争": "模仿冬木仪式的不完整战争",
+      "Snowfield": "故事舞台的沙漠新城"
+    },
+    "factions": [
+      { "name": "美国魔术师团", "description": "策划伪战争的哈费兹一派" },
+      { "name": "时钟塔监视员", "description": "魔术协会派来的观察者" },
+      { "name": "圣堂教会", "description": "派遣监督者的教会势力" }
+    ],
+    "characters": [
+      {"name":"理查德一世","rarity":"","nickname":"狮心王","affiliation":"Saber阵营","role":"Saber · 狮子王","personality":"豪迈浪漫、爱戏剧化登场","speechStyle":"骑士王式的华丽英语腔","deeds":"以十字军之王之姿响应召唤的英国传奇君主","relation":"绫香的守护骑士，尊重且护短"},
+      {"name":"沙条绫香","rarity":"主角","nickname":"怯生生的御主","affiliation":"Saber阵营","role":"御主","personality":"内向胆小、意外坚韧","speechStyle":"细声细语的少女应答","deeds":"被卷入战争却逐渐成长为合格御主的普通少女","relation":"主角本人"},
+      {"name":"恩奇都","rarity":"","nickname":"天命黏土人偶","affiliation":"Lancer阵营","role":"Lancer","personality":"天真无邪、自然之子","speechStyle":"空灵纯粹的好奇发问","deeds":"众神创造的黏土兵器，与英雄王势均力敌","relation":"战场上最不可预测的存在"},
+      {"name":"缇妮·切尔克","rarity":"","nickname":"森林少女","affiliation":"Lancer阵营","role":"御主","personality":"安静纯真","speechStyle":"简短的轻语","deeds":"与恩奇都心灵相通的原住民少女","relation":"恩奇都的御主，战争的旁观者兼核心"}
+    ],
+    "taboos": ["日常化处理圣杯战争的杀伐", "现代科技对抗从者"],
+    "timeNotes": "战争无昼夜；从者夜间活动频繁"
+  }
+}
