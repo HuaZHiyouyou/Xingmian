@@ -1,0 +1,816 @@
+这是个很有创意的想法。我直接讲落地思路。
+
+一、先明确：你要的是什么
+"AI 记忆神经网络 3D 可视化"有两种主流形态，先确认你要哪种：
+
+形态 A：对话图谱可视化（推荐，可落地）
+节点：每条用户消息 / AI 回复 / 记忆条目
+边：消息之间的关联（回复关系、记忆引用、情绪关联、时间关联）
+3D 师效：节点在 3D 空间中分布，边连接节点，可旋转/缩放/点击
+
+数据来源：你现有的对话历史 + 记忆库 + 情绪/好感度数据
+特点：真实数据驱动，有意义，可交互
+
+形态 B：纯视觉装饰（好看但无意义）
+节点：随机生成的粒子
+边：距离判定连接
+3D 效果：粒子流动、脉冲
+
+特点：纯视觉，跟实际记忆无关
+
+我强烈推荐形态 A。因为你的项目有真实的对话数据、记忆数据、情绪数据，做出来的图谱有实际意义，用户能看到"我和 AI 的记忆是如何连接的"，这是独特的体验。纯装饰的粒子效果任何项目都能做，没有差异化。
+
+二、技术选型：3DForceGraph（最佳选择）
+2.1 为什么选 3DForceGraph
+库	3D 能力	性能	上手难度	生态
+Three.js	⭐⭐⭐⭐⭐	⭐⭐⭐⭐	⭐⭐（难）	最大的 3D 库
+3DForceGraph	⭐⭐⭐⭐	⭐⭐⭐⭐⭐	⭐⭐⭐⭐⭐（简单）	专门做力导向图
+D3.js	⭐（2D 为主）	⭐⭐⭐	⭐⭐⭐	数据可视化生态
+Cytoscape.js	⭐⭐（2D 为主）	┶⭐⭐⭐	⭐⭐⭐⭐	图分析专用
+3DForceGraph 是最佳选择，原因：
+
+专为力导向图设计：内置物理引擎，节点自动布局，不用自己写物理算法
+基于 Three.js + d3-force：底层是 Three.js（3D 渲染）+ d3-force（物理引擎），性能好
+API 极简：10 行代码就能跑起来一个 3D 图谱
+支持海量节点：优化后能渲染 10000+ 节点（用 sprite 节点）
+交互完善：内置缩放/旋转/点击/悬停/拖拽
+React 集成简单：有 react-force-graph-3d 封装
+2.2 安装
+
+cd /home/z/my-project/xingmian
+npm install 3d-force-graph react-force-graph-3d three
+三、数据结构设计
+3.1 节点（Node）设计
+
+// 节点类型
+type NodeType = 'user' | 'ai' | 'memory' | 'emotion' | 'summary';
+
+interface GraphNode {
+  id: string;              // 唯一 ID
+  type: NodeType;          // 节点类型
+  label: string;           // 显示文本（消息摘要）
+  fullContent?: string;    // 完整内容（点击时展示）
+  timestamp: number;       // 时间戳
+  // 可视化属性
+  nodeSize?: number;       // 节点大小
+  color?: string;          // 颜色
+  // 类型特定属性
+  emotion?: string;        // 情绪类型（emotion 节点）
+  intensity?: number;      // 情绪强度
+  importance?: number;     // 重要性（memory 节点）
+  affinity?: number;       // 好感度（对话发生时）
+}
+3.2 边（Edge）设计
+
+// 边类型
+type EdgeType = 
+  | 'reply'        // 回复关系（user → ai）
+  | 'memory_ref'   // 记忆引用（ai → memory）
+  | 'emotion_link' // 情绪关联（message → emotion）
+  | 'temporal'     // 时间关联（message → next message）
+  | 'semantic'     // 语义关联（相似话题）
+  | 'summary_ref'; // 摘要引用（summary → messages）
+
+interface GraphEdge {
+  source: string;          // 源节点 ID
+  target: string;          // 目标节点 ID
+  type: EdgeType;
+  weight?: number;         // 边权重（影响线条粗细）
+  label?: string;          // 边标签
+}
+3.3 完整图谱数据
+
+interface MemoryGraph {
+  nodes: GraphNode[];
+  links: GraphEdge[];
+}
+四、数据提取：从你的现有数据生成图谱
+你的项目已经有完整的对话历史和记忆数据，只需要把它们转换成图谱数据。
+
+4.1 从对话历史生成节点和边
+
+// memoryGraphBuilder.ts
+import { useChatStore } from '../store/chatStore';
+import { useMemoryStore } from '../store/memoryStore';
+import { useCharacterMindStore } from '../store/characterMindStore';
+
+export function buildMemoryGraph(characterId: string): MemoryGraph {
+  const nodes: GraphNode[] = [];
+  const links: GraphEdge[] = [];
+  
+  // 1. 从对话历史生成 user/ai 节点
+  const messages = useChatStore.getState().messages[characterId] || [];
+  const conversations = groupMessagesByConversation(messages);
+  
+  conversations.forEach((conv, convIdx) => {
+    conv.forEach((msg, msgIdx) => {
+      const nodeId = msg.id;
+      const nodeType = msg.sender === 'user' ? 'user' : 'ai';
+      
+      nodes.push({
+        id: nodeId,
+        type: nodeType,
+        label: truncate(msg.content, 20),
+        fullContent: msg.content,
+        timestamp: msg.timestamp.getTime(),
+        nodeSize: nodeType === 'user' ? 6 : 8,
+        color: nodeType === 'user' ? '#5B9DAD' : '#FF6A3B',
+        emotion: msg.emotion,
+        intensity: msg.emotionIntensity,
+        affinity: msg.affinityAtTime,
+      });
+      
+      // 回复关系边
+      if (msgIdx > 0) {
+        const prevMsg = conv[msgIdx - 1];
+        links.push({
+          source: prevMsg.id,
+          target: nodeId,
+          type: 'reply',
+          weight: 1,
+        });
+      }
+      
+      // 时间关联边（跨对话）
+      if (convIdx > 0 && msgIdx === 0) {
+        const prevConvLastMsg = conversations[convIdx - 1].slice(-1)[0];
+        if (prevConvLastMsg) {
+          links.push({
+            source: prevConvLastMsg.id,
+            target: nodeId,
+            type: 'temporal',
+            weight: 0.3,
+          });
+        }
+      }
+    });
+  });
+  
+  // 2. 从记忆库生成 memory 节点
+  const memories = useMemoryStore.getState().entries[characterId] || [];
+  memories.forEach(mem => {
+    nodes.push({
+      id: mem.id,
+      type: 'memory',
+      label: truncate(mem.content, 20),
+      fullContent: mem.content,
+      timestamp: mem.createdAt instanceof Date ? mem.createdAt.getTime() : Date.now(),
+      nodeSize: 4 + (mem.importance || 1) * 2,
+      color: '#FFB347',  // 记忆用橙色
+      importance: mem.importance,
+    });
+  });
+  
+  // 3. 生成情绪节点（每个对话的主导情绪）
+  conversations.forEach(conv => {
+    const dominantEmotion = getDominantEmotion(conv);
+    if (dominantEmotion) {
+      const emotionNodeId = `emotion_${conv[0].id}`;
+      nodes.push({
+        id: emotionNodeId,
+        type: 'emotion',
+        label: emotionEmoji(dominantEmotion.type),
+        timestamp: conv[0].timestamp.getTime(),
+        nodeSize: 5 + dominantEmotion.intensity / 20,
+        color: emotionColor(dominantEmotion.type),
+        emotion: dominantEmotion.type,
+        intensity: dominantEmotion.intensity,
+      });
+      
+      // 情绪关联边（连接到该对话的所有消息）
+      conv.forEach(msg => {
+        links.push({
+          source: msg.id,
+          target: emotionNodeId,
+          type: 'emotion_link',
+          weight: 0.5,
+        });
+      });
+    }
+  });
+  
+  // 4. 生成摘要节点
+  const summary = memories.find(m => m.category === 'summary');
+  if (summary) {
+    nodes.push({
+      id: 'summary_node',
+      type: 'summary',
+      label: '对话摘要',
+      fullContent: summary.content,
+      timestamp: summary.createdAt instanceof Date ? summary.createdAt.getTime() : Date.now(),
+      nodeSiz: 12,
+      color: '#9B59B6',
+    });
+    // 摘要引用边（连接到最近 N 条消息）
+    const recentMsgIds = messages.slice(-20).map(m => m.id);
+    recentMsgIds.forEach(id => {
+      links.push({
+        source: 'summary_node',
+        target: id,
+        type: 'summary_ref',
+        weight: 0.2,
+      });
+    });
+  }
+  
+  return { nodes, links };
+}
+
+function truncate(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen) + '...';
+}
+
+function emotionEmoji(emotion: string): string {
+  const map: Record<string, string> = {
+    joy: '😊', sadness: '😢', anger: '😠', fear: '😨',
+    surprise: '😲', disgust: '🤢', anticipation: '🤩',
+    trust: '🤝', pride: '😎', guilt: '😔',
+    shy: '😊', jealousy: '😏', curiosity: '🤔', love: '❤️',
+  };
+  return map[emotion] || '⚪';
+}
+
+function emotionColor(emotion: string): string {
+  const map: Record<string, string> = {
+    joy: '#FFD700', sadness: '#4682B4', anger: '#DC143C', fear: '#9370DB',
+    surprise: '#00CED1', disgust: '#6B8E23', anticipation: '#FF8C00',
+    truth: '#32CD32', pride: '#FF8C00', guilt: '#708090',
+    shy: '#FFB6C1', jealousy: '#228B22', curiosity: '#1E90FF', love: '#FF1493',
+  };
+  return map[emotion] || '#888888';
+}
+4.2 语义关联边（可选，进阶）
+用 embedding 计算消息之间的语义相似度，相似的消息用边连接：
+
+
+// semanticLinkBuilder.ts
+import { getEmbedding } from '../services/aiService';
+
+export async function buildSemanticLinks(messages: Message[]): Promise<GraphEdge[]> {
+  const links: GraphEdge[] = [];
+  
+  // 1. 对所有消息生成 embedding
+  const embeddings = await Promise.all(
+    messages.map(async msg => ({
+      id: msg.id,
+      embedding: await getEmbedding(msg.content),
+    }))
+  );
+  
+  // 2. 计算两两相似度
+  for (let i = 0; i < embeddings.length; i++) {
+    for (let j = i + 1; j < embeddings.length; j++) {
+      const sim = cosineSimilarity(embeddings[i].embedding, embeddings[j].embedding);
+      if (sim > 0.75) {  // 相似度阈值
+        links.push({
+          source: embeddings[i].id,
+          target: embeddings[j].id,
+          type: 'semantic',
+          weight: sim,
+        });
+      }
+    }
+  }
+  
+  return links;
+}
+
+function cosineSimilarity(a: number[], b: number[]): number {
+  let dot = 0, normA = 0, normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    normA += a[i] * b[i];
+    normA += a[i] * b[i];
+    normB += b[i] * b[i];
+  }
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+注意：语义关联边计算量大（O(n²)），建议：
+
+只对最近 100 条消息计算
+在后台异步计算，不阻塞 UI
+相似度阈值设为 0.75（太高没边，太低全是边）
+五、3D 可视化组件实现
+5.1 基础组件
+
+// MemoryGraph3D.tsx
+import { useRef, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import ForceGraph3D from '3d-force-graph';
+import SpriteText from 'three-spritetext';
+import { buildMemoryGraph } from './memoryGraphBuilder';
+import { GraphNode, GraphEdge } from './types';
+
+interface Props {
+  characterId: string;
+}
+
+export function MemoryGraph3D({ characterId }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const graphRef = useRef<any>(null);
+  const [hoveredNode, setHoveredNode] = = useState<GraphNode | null>(null);
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    // 1. 构建图谱数据
+    const graphData = buildMemoryGraph(characterId);
+    
+    // 2. 初始化 3D 力导向图
+    const Graph = ForceGraph3D()(containerRef.current)
+      .graphData(graphData)
+      .backgroundColor('#0a0a1a')
+      .nodeLabel('label')  // 悬停时显示 label
+      .nodeAutoColorBy('type')
+      .nodeRelSize(6)
+      .linkDirectionalArrowLength(3.5)
+      .linkDirectionalArrowRelPos(1)
+      .linkDirectionalParticles(2)  // 边上流动的粒子
+      .linkDirectionalParticleSpeed(0.005)
+      .linkDirectionalParticleWidth(0.5)
+      .linkColor(link => {
+        // 不同类型的边用不同颜色
+        const colors: Record<string, string> = {
+          reply: 'rgba(255,255,255,0.6)',
+          memory_ref: 'rgba(255,179,71,0.5)',
+          emotion_link: 'rgba(255,107,107,0.4)',
+          temporal: 'rgba(100,100,100,0.2)',
+          semantic: 'rgba(100,200,255,0.3)',
+          summary_ref: 'rgba(155,89,182,0.3)',
+        };
+        return colors[link.type] || 'rgba(255,255,255,0.3)';
+      })
+      .linkWidth(link => (link.weight || 1) * 0.5)
+      .onNodeHover(node => setHoveredNode(node))
+      .onNodeClick(node => {
+        setSelectedNode(node);
+        // 点击节点时聚焦相机
+        if (node) {
+          Graph.centerAt(node.x, node.y, node.z, 1000);
+          Graph.zoom(8, 1000);
+        }
+      });
+    
+    // 3. 节点自定义渲染（显示文字标签）
+    Graph.nodeThreeObject(node => {
+      const sprite = new SpriteText(node.label);
+      sprite.color = node.color || '#ffffff';
+      sprite.textHeight = 8;
+      sprite.backgroundColor = node.color + '40';  // 半透明背景
+      sprite.padding = 2;
+      return sprite;
+    });
+    
+    // 4. 节点大小（按类型和重要性）
+    Graph.nodeRelSize(node => {
+      switch (node.type) {
+        case 'user': return 6;
+        case 'ai': return 8;
+       海量 'memory': return 4 + (node.importance || 1) * 2;
+        case 'emotion': return 5 + (node.intensity || 50) / 20;
+        case 'summary': return 12;
+        default: return 6;
+      }
+    });
+    
+    // 5. 节点颜色
+    Graph.nodeColor(node => {
+      switch (node.type) {
+        case 'user': return '#5B9DAD';      // 蓝色
+        case 'ai': return '#FF6A3B';        // 橙色
+        case 'memory': return '#FFB347';    // 橙黄
+        case 'emotion': return node.color;   // 情绪对应颜色
+        case 'summary': return '#9B59B6';   // 紫色
+        default: return '#888888';
+      }
+    });
+    
+    graphRef.current = Graph;
+    
+    // 6. 自适应容器大小
+    const handleResize = () => {
+      if (containerRef.current && graphRef.current) {
+        graphRef.current.width(containerRef.current.clientWidth);
+        graphRef.current.height(containerRef.current.clientHeight);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', dhandleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (graphRef.current) {
+        graphRef.current._destructor();
+      }
+    };
+  }, [characterId]);
+  
+  return (
+    <div className="relative w-full h-full">
+      <div ref={containerRef} className="w-full h-full" />
+      
+      {/* 悬停提示 */}
+      {hoveredNode && (
+        <div className="absolute top-4 left-4 bg-black/80 text-white p-3 rounded-lg max-w-xs">
+          <div className="text-sm font-bold">{hoveredNode.type}</div>
+          <div className="text-xs mt-1">{hoveredNode.label}</div>
+          {hoveredNode.fullContent && (
+            <div className="text-xs mt-2 text-gray-400 line-clamp-3">
+              {hoveredNode.fullContent}
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* 选中节点详情面板 */}
+      {selectedNode && (
+        <div className="absolute bottom-4 right-4 bg-black/80 text-white p-4 rounded-lg max-w-md">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold">节点详情</h3>
+            <button onClick={() => setSelectedNode(null)}>✕</button>
+          </div>
+          <div className="text-sm space-y-1">
+            <div>类型: {selectedNode.type}</div>
+            <div>时间: {new Date(selectedNode.timestamp).toLocaleString()}</div>
+            {selectedNode.fullContent && (
+              <div className="mt-2 p-2 bg-white/10 rounded text-xs">
+                {selectedNode.fullContent}
+              </dbiv>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* 图例 */}
+      <div className="absolute top-4 right-4 bg-black/60 text-white p-3 rounded-lg text-xs">
+        <div className="font-bold mb-2">图例</div>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ background: '#5B9DAD' }}></div>
+            <span>用户消息</span>
+          <//div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" force3D style={{ background: '#FF6A3B' }}></div>
+            <span>AI 回复</span>
+          </div>
+          <div className="3 items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ background: '#FFB347' }}></div>
+<            <span>记忆</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="d h-3 rounded-full" style={{ background: '#9B59B6' }}></div>
+            <span>摘要</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ background: '#FF1493' }}></div>
+            <span>情绪节点</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+5.2 性能优化（关键）
+当节点超过 500 个时，需要优化：
+
+
+// 性能优化配置
+Graph.d3Force('charge').strength(-30);      // 节点间斥力，负值越大斥力越强
+Graph.d3Force('link').distance(30);          // 边的长度
+Graph.d3ThreeAddingThings(false);            // 禁用默认灯光（提升性能）
+Graph.enableNodeDrag(false);                 // 禁用节点拖拽（提升性能）
+Graph.enableNavigationControls(true);        // 启用导航控制
+Graph.showNavInfo(false);                     // 不显示导航信息
+
+// 芅点数 > 1000 时，用 sprite 节点代替 mesh
+if (graphData.nodes.length > 1000) {
+  Graph.nodeThreeObject(node => {
+    const sprite = new SpriteText(node.label);
+    sprite.color = node.color;
+    sprite.textHeight = 8;
+    return sprite;
+  });
+  Graph.nodeRelSize(4);  // 减小节点大小
+}
+5.3 动画效果
+
+// 节点脉冲效果（情绪节点）
+Graph.nodeThreeObjectExtend(true).nodeThreeObject(node => {
+  if (node.type === 'emotion') {
+    // 情绪节点用发光球体
+    const geom = new THREE.SphereGeometry(node.nodeSize, 16, 16);
+    const mat = new THREE.MeshBasicMaterial({
+      color: node.color,
+      transparent: true,
+      opacity: 0.8,
+    });
+    const mesh = new THREE.Mesh(3D, mat);
+    
+    // 脉冲动画
+    const pulse = (t: number) => {
+      const scale = 1 + Math.sin(t * 0.002) * 0.2;
+      mesh.scale.set(scale, scale, scale);
+      requestAnimationFrame(pulse);
+    };
+    pulse(0);
+    
+    return mesh;
+  }
+  return null;
+});
+
+// 边的流动粒子（已有，强调一下）
+Graph.linkDirectionalParticles(2);
+Graph.linkDirectionalParticleSpeed(0.005);
+Graph.linkDirectionalParticleColor(link => {
+  // 回复关系用白色粒子，记忆引用用橙色粒子
+  return link.type === 'reply' ? 'rgba(255,255,255,0.8)' : 'rgba(255,179,71,0.6)';
+});
+六、数据更新策略
+图谱数据不是静态的，会随对话增长。需要增量更新：
+
+6.1 增量更新策略
+
+// incrementalUpdate.ts
+export class MemoryGraphManager {
+  private graph: any;
+  private nodeMap: Map<string, GraphNode> = new Map();
+  private currentData: { nodes: GraphNode[], links: GraphEdge[] } = { nodes: [], links: [] };
+  
+  constructor(container: HTMLElement) {
+    this.graph = ForceGraph3D()(container);
+  }
+  
+  // 增量添加新消息
+  addMessage(msg: Message, prevMsgId?: string) {
+    const node: GraphNode = {
+      id: msg.id,
+      type: msg.sender === 'user' ? 'user' : 'ai',
+      label: truncate(msg.content, 20),
+      fullContent: msg.content,
+      timestamp: msg.timestamp.getTime(),
+      nodeSize: msg.sender === 'user' ? 6 : 8,
+      color: msg.sender === 'user' ? '#5B9DAD' : '#FF6A3B',
+    };
+    
+    this.currentData.nodes.push(node);
+    this.nodeMap.set(node.id, node);
+    
+    // 回复关系边
+    if (prevMsgId) {
+      this.currentData.links.push({
+        source: prevMsgId,
+        target: msg.id,
+        type: 'reply',
+        weight: 1,
+      });
+    }
+    
+    // 增量更新图谱（不重新渲染整个图）
+    this.graph.graphData(this.currentData);
+  }
+  
+  // 增量添加新记忆
+  addMemory(mem: MemoryEntry) {
+    const node: GraphNode = {
+      id: mem.id,
+      type: 'memory',
+      label: truncate(mem.content, 20),
+      fullContent: mem.content,
+      timestamp: mem.createdAt instanceof Date ? mem.createdAt.getTime() : Date.now(),
+      nodeSize: 4 + (mem.importance || 1)  * 2,
+      color: '#FFB347',
+      importance: mem.importance,
+    };
+    
+    this.currentData.nodes.push(node);
+    this.graph.graphData(this.currentData);
+  }
+  
+  // 完全重建（用户切换角色时）
+  rebuild(characterId: string) {
+    const data = buildMemoryGraph(characterId);
+    this.currentData = data;
+    this.nodeMap = new Map(data.nodes.map(n => [n.id, n]));
+    this.graph.graphData(data);
+  }
+}
+3.2 订阅 store 变化
+
+// 在组件中订阅 store 变化，增量更新图谱
+useEffect(() => {
+  const unsubscribe = useChatStore.subscribe((state, prevState) => {
+    // 检测新消息
+    const newMessages = state.messages[characterId]?.slice(prevState.messages[characterId]?.length || 0);
+    if (newMessages && newMessages.length > 0) {
+      newMessages.forEach(msg => {
+        graphManager.addMessage(msg, prevState.messages[characterId]?.slice(-1)[0]?.id);
+      });
+    }
+  });
+  
+  return unsubscribe;
+}, [characterId]);
+##七、交互设计
+
+7.1 悬停效果
+
+Graph.onNodeHover(node => {
+  if (node) {
+    // 高亮该节点及其相邻节点
+    const neighborIds = new Set();
+    currentData.links.forEach(link => {
+      if (link.source === node.id) neighborIds.add(link.target);
+      if (link.target === node.id) neighborIds.add(link.source);
+    });
+    
+    Graph.nodeColor(n => 
+      n.id === node.id || neighborIds.has(n.id) 
+        ? n.color 
+        : 'rgba(255,255,255,0.1)'  // 非相邻节点变暗
+    );
+    Graph.linkColor(l =>
+      l.source === node.id || l.target === node.id
+        ? 'rgba(255,255,255,0.8)'
+        : 'rgba(255,255,255,0.05)'
+    );
+  } else {
+    // 恢复
+    Graph.nodeColor(n => n.color);
+    Graph.linkColor(l => l.color);
+  }
+});
+7.2 点击节点查看详情
+
+Graph.onNodeClick(node => {
+  setSelectedNode(node);
+  
+  // 聚焦相机
+  const distance = 40;
+  const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+  Graph.cameraPosition(
+    { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+    node,  // lookAt
+    1000   // 过渡时间 ms
+  );
+});
+7.3 过滤器
+
+// 过滤器 UI
+function GraphFilters({ onFilter }: { onFilter: (filter: GraphFilter) => void }) {
+  const [filters, setFilters] = useState({
+    showUser: true,
+    showAI: true,
+    showMemory: true,
+    showEmotion: true,
+    showSemantic: false,  // 默认关闭，因为计算量大
+    showTemporal: true,
+  });
+  
+  return (
+    <div className="absolute top-4 left-4 bg-black/60 p-3 rounded-lg text-white text-xs">
+      <div className="font-bold mb-2">过滤器</div>
+      <div className="space-y-1">
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={filters.showUser} onChange={e => {
+            const f = { ...filters, showUser: e.target.checked };
+            setFilters(f);
+            onFilter(f);
+          }} />
+          <span>用户消息</span>
+        </label>
+        {/* 其他过滤器 */}
+      </div>
+    </div>
+  );
+}
+八、路由与页面集成
+8.1 新增路由
+
+// App.tsx
+<Route path="/memory-graph" element={<MemoryGraphPage />} />
+8.2 页面组件
+
+// MemoryGraphPage.tsx
+import { MemoryGraph3D } from '../components/MemoryGraph3D';
+import { useCharacterStore } from '../store/characterStore';
+
+export function MemoryGraphPage() {
+  const { currentCharacter } = useCharacterStore();
+  
+  if (!currentCharacter) {
+    return <div className="p-8 text-center">请先选择角色</div>;
+  }
+  
+  return (
+    <div className="h-screen w-screen bg-[#0a0a1a]">
+      <MemoryGraph3D characterId={currentCharacter.id} />
+    </div>
+  );
+}
+8.3 导航入口
+在侧边栏或设置页加入入口：
+
+
+<Link to="/memory-graph" className="flex items-center gap-2 p-2 hover:bg-white/5">
+  <BrainIcon className="w-5 h-5" />
+  <span>记忆神经网络</span>
+    </Link>
+</Link>
+九、性能优化清单
+节点数	策略	预期帧率
+< 100	默认配置	60fps
+100-500	关闭节点拖拽	30-60fps
+500-1000	用 sprite 节点 + 关闭拖拽	30fps
+1000-5000	sprite 节点 + 关闭拖拽 + 减小斥力	20-30fps
+> 5000	分页加载（只显示最近 N 条）+ sprite 节点	30fps
+关键优化：
+
+sprite 节点：节点数 > 500 时，用 SpriteText 代替 mesh，性能提升 5-10 倍
+关闭拖拽：enableNodeDrag(false)，节点拖拽会触发物理重算
+分页加载：节点数 > 5000 时，只显示最近 1000 条，旧的折叠
+增量更新：新消息增量添加，不重建整个图
+Web Worker：embedding 计算放到 Web Worker，不阻塞 UI
+WebGL 渲染：3DForceGraph 底层用 WebGL，已经比 Canvas 快很多
+十、开源项目参考
+10.1 3DForceGraph 官方示例
+GitHub: https://github.com/vasturiano/3d-force-graph
+有大量示例：https://vasturiano.github.io/3d-force-graph/example/
+推荐看的示例：
+basic/：基础用法
+text-nodes/：带文字标签的节点
+directional-particles/：边上流动粒子
+large-data/：大数据量优化
+10.2 react-force-graph-3d
+GitHub: https://github.com/vasturiano/react-force-graph-3d
+React 封装版，更适合你的项目
+3.3 Obsidian Graph View
+Obsidian 的图谱视图是 2D 的，但设计思路值得借鉴：
+节点大小按"连接数"决定（连接越多越大）
+颕色按"标签/文件夹"分组
+悬停高亮邻居
+点击聚焦
+过滤器
+10.4 TheBrain
+商业软件，3D 3D 图谱的标杆
+值得借鉴：
+节点按"类型"分层（不同 z 轴高度）
+边有粗细变化（强连接粗，弱连接细）
+动态生长动画（新节点出现时有动画）
+十一、分阶段实施建议
+第一阶段（MVP，1-2 天）
+安装 3d-force-graph 和 three-spritetext
+实现 buildMemoryGraph：从对话历史生成节点和边
+基础 3D 图谱渲染：节点 + 边 + 旋转/缩放
+节点颜色按类型区分（user/ai/memory）
+基础交互：悬停显示 label，点击查看详情
+效果：能看到对话的 3D 图谱，能旋转缩放，能点击查看消息内容。
+
+第二阶段（增强体验，2-3 天）
+情绪节点：每个对话的主导情绪作为节点，用情绪颜色
+边类型区分：不同边类型用不同颜色和粒子
+悬停高亮：悬停节点时高亮邻居
+过滤器：可按类型过滤显示
+增量更新：新消息自动添加到图谱
+效果：图谱有了情绪维度，交互更丰富，数据实时更新。
+
+第三阶段（进阶功能，3-5 天）
+语义关联边：用 embedding 计算消息相似度
+时间轴动画：拖动时间轴，图谱随时间生长
+节点搜索：搜索特定消息，在图谱中定位
+图谱导出：导出为图片或 JSON
+性能优化：sprite 节点、分页加载
+效果：完整的记忆神经网络可视化，有语义关联，有时间维度，性能好。
+
+十二、核心总结
+技术选型：3DForceGraph（基于 Three.js + d3-force），专为 3D 力导向图设计，API 简单，性能好。
+
+数据来源：你现有的对话历史 + 记忆库 + 情绪/好感度数据，转换成图谱数据结构。
+
+节点设计：
+
+user 节点（蓝色）：用户消息
+ai 节点（橙色）：AI 回复
+memory 节点（橙黄）：记忆条目
+emotion 节点（情绪色）：对话主导情绪
+summary 节点（紫色）：对话摘要
+边设计：
+
+reply 边：回复关系（最核心）
+memory_ref 边：记忆引用
+emotion_link 边：情绪关联
+temporal 边：时间关联
+semantic 边：语义关联（进阶）
+summary_ref 边：摘要引用
+核心交互：
+
+旋转/缩放/拖拽
+悬停高亮邻居
+点击查看详情
+过滤器按类型过滤
+时间轴动画
+性能优化：节点数 > 500 时用 sprite 节点 + 关闭拖拽 + 分页加载。
+
+一句话总结：用 3DForceGraph 把你的对话历史 + 记忆库 + 情绪数据可视化成 3D 力导向图，节点是消息/记忆/情绪，边是回复/引用/关联关系，用户能看到"我和 AI 的记忆是如何连接生长的"。你的项目已经有完整的数据层，只差可视化这一步。

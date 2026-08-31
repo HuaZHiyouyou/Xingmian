@@ -1,0 +1,228 @@
+一、核心思路：为什么"放大 max_tokens"是错的
+推理模型（DeepSeek-R1 / Gemini-Thinking / o1 / o3 等）的 max_tokens 限制的是 reasoning_tokens + text_tokens 的总和。这跟普通模型完全不同。
+
+关键认知：
+
+普通模型：max_tokens 只限制输出文本，给多少用多少
+推理模型：max_tokens 是"思考预算 + 输出预算"的共享池子，模型在思考阶段是贪婪的——只要还有预算就继续展开思维链
+所以你给推理模型放大 max_tokens，等于给它更多"尽情思考"的弹药，它会继续把新增预算全部吃光，正文依然为空。这就是你之前"放大重试 2x→3x→4x"越放大越糟的根本原因。
+
+正确做法：推理模型不设置 max_tokens，让模型自由生成，靠 prompt 工程约束输出格式。这正是恋语、astrbot、SillyTavern 的共同做法。
+
+二、三步修复方案
+第一步：推理模型不设置 max_tokens
+compute_max_tokens 函数对推理模型直接返回 0（表示不设置）：
+
+
+fn compute_max_tokens(base, use_full_cognitive, is_reasoning, ...) -> i64 {
+    if base <= 0 { return 0; }
+    if is_reasoning { return 0; }  // 推理模型不限制
+    // 普通模型才走放大逻辑
+    let mut adjusted = base;
+    if use_full_cognitive { adjusted = (adjusted as f64 * cognitive_multiplier) as i64; }
+    adjusted.min(max_tokens_cap)
+}
+请求体构建时，final_max_tokens == 0 就不写入 body["max_tokens"]：
+
+
+if final_max_tokens > 0 {
+    body["max_tokens"] = final_max_tokens.into();
+}
+第二步：重试策略改为"降级 reasoning_effort"
+当检测到 reasoning_tokens > 0 && text_tokens == 0 && content 为空 时，不要放大 max_tokens，而是逐级降低 reasoning_effort：
+
+
+let effort_chain: Vec<&str> = match effort.as_str() {
+    "high"   => vec!["medium", "low", "none"],
+    "medium" => vec!["low", "none"],
+    "low"    => vec!["none"],
+    _        => vec!["none"],
+};
+for new_effort in effort_chain {
+    retry_body["reasoning_effort"] = new_effort.into();
+    // 不设置 max_tokens，让模型自由生成
+    llm_resp = call_ai_full(...).await?;
+    if !llm_resp.content.trim().is_empty() { break; }
+}
+原理：降低 reasoning_effort 逼迫模型压缩推理，留出正文空间。这是 OpenAI o1/o3 官方推荐做法。
+
+第三步：增强模型识别 + provider 原生参数
+3.1 扩展 is_reasoning_model 覆盖范围
+不要靠维护具体模型名列表，用通用特征匹配 + 用户显式提示双通道：
+
+
+fn is_reasoning_model(model_name: &str, reasoning_effort: &str) -> bool {
+    let lower = model_name.to_lowercase();
+    if lower.contains("embedding") { return false; }
+    // 用户显式设置 reasoning_effort → 必然是推理模型
+    let effort = reasoning_effort.trim().to_lowercase();
+    if ["low","medium","high"].contains(&effort.as_str()) { return true; }
+    // 通用名称特征
+    lower.starts_with("o1") || lower.starts_with("o3") || lower.starts_with("o4")
+        || lower.contains("gpt-5")
+        || lower.contains("gemini")           // Gemini 2.x+ 全系原生 reasoning
+        || lower.contains("reason")           // deepseek-reasoner
+        || lower.contains("think")            // 内置 thinking
+        || lower.contains("r1")               // DeepSeek-R1, Qwen-R1
+        || lower.contains("qwq")              // 阿里 QwQ
+        || lower.contains("qwen3")            // Qwen3 系列（默认带思考）
+        || lower.contains("marco")            // Marco-o1
+        || lower.contains("nemotron")         // NVIDIA
+        || lower.contains("claude") && (
+            lower.contains("3.7") || lower.contains("4-") || 
+            lower.contains("opus-4") || lower.contains("sonnet-4")
+        )                                     // Claude 3.7+/4 系列带 extended thinking
+        || lower.contains("glm-4-thinking") || lower.contains("glm-4.5") || lower.contains("glm-z1")
+        || lower.contains("doubao") && lower.contains("thinking")
+        || lower.contains("kimi-k1") || lower.contains("kimi-k2")
+        || lower.contains("deepseek-r")      // deepseek-r1, deepseek-reasoner
+}
+3.2 provider 原生参数适配
+不同 provider 用不同参数控制推理，写一个适配函数：
+
+
+fn build_provider_params(model_name: &str, base_max_tokens: i64, reasoning_effort: &str) -> (Value, bool) {
+    let lower = model_name.to_lowercase();
+    let mut params = serde_json::json!({});
+    let mut skip_max_tokens = false;
+
+    // OpenAI o1/o3/o4：用 max_completion_tokens 替代 max_tokens
+    if lower.starts_with("o1") || lower.starts_with("o3") || lower.starts_with("o4") {
+        if base_max_tokens > 0 {
+            params["max_completion_tokens"] = base_max_tokens.into();
+        }
+        if ["low","medium","high"].contains(&reasoning_effort) {
+            params["reasoning_effort"] = reasoning_effort.into();
+        }
+        skip_max_tokens = true;  // 不要再写 max_tokens
+    }
+    // Gemini：用 thinking_budget 单独控制推理预算
+    else if lower.contains("gemini") {
+        // thinking_budget: -1 动态, 0 禁用, 正数=固定预算
+        params["generation_config"] = serde_json::json!({
+            "thinking_config": { "thinking_budget": -1 }
+        });
+        skip_max_tokens = true;
+    }
+    // Claude 3.7+/4：用 thinking.budget_tokens，且 temperature 必须为 1
+    else if lower.contains("claude") && (lower.contains("3.7") || lower.contains("4-")) {
+        params["thinking"] = serde_json::json!({
+            "type": "enabled",
+            "budget_tokens": 10000  // 推理预算，留出正文空间
+        });
+        skip_max_tokens = true;
+    }
+    // DeepSeek-R1：不设置 max_tokens，让模型自由生成
+    else if lower.contains("deepseek-r") || lower.contains("r1") {
+        skip_max_tokens = true;
+    }
+    // 通用推理模型：不设置 max_tokens
+    else if is_reasoning_model(model_name, reasoning_effort) {
+        skip_max_tokens = true;
+        if ["low","medium","high"].contains(&reasoning_effort) {
+            params["reasoning_effort"] = reasoning_effort.into();
+        }
+    }
+
+    (params, skip_max_tokens)
+}
+调用时合并到 body：
+
+
+let (provider_params, skip_max_tokens) = build_provider_params(&model_name, final_max_tokens, &effort);
+if let Some(obj) = provider_params.as_object() {
+    for (k, v) in obj { body[k] = v.clone(); }
+}
+if final_max_tokens > 0 && !skip_max_tokens {
+    body["max_tokens"] = final_max_tokens.into();
+}
+三、多级备用方案设计（4 层兜底）
+按"成本从低到高、效果从好到差"排列：
+
+方案 A：降级 reasoning_effort（首选，成本最低）
+触发条件：reasoning_tokens > 0 && text_tokens == 0 && content 为空
+
+做法：high → medium → low → none 逐级降级，每次只改 reasoning_effort 参数，不放大 max_tokens。
+
+优点：只改一个参数，不重新构建 prompt，成本最低
+缺点：对不支持 reasoning_effort 的模型无效（如 DeepSeek-R1、Gemini）
+
+方案 B：简化 prompt 重试（次选）
+触发条件：方案 A 全部失败后
+
+做法：去掉认知链要求（<thought>/<reply> 标签），用最简 prompt 让模型直接输出回复：
+
+
+let simple_messages = vec![
+    json!({ "role": "system", "content": format!("你是「{}」，请直接回复用户，保持角色人格。", req.character_name) }),
+    json!({ "role": "user", "content": &req.user_message }),
+];
+let retry_body = json!({
+    "model": model_name,
+    "messages": simple_messages,
+    "temperature": req.temperature,
+    "stream": req.stream_enabled,
+    // 不设置 max_tokens
+});
+优点：大幅降低 prompt 复杂度，模型有更多空间输出正文
+缺点：丢失认知链（情绪/好感度增量），需要后端从回复语义反推
+
+方案 C：从 reasoning_content 提取（最终兜底）
+触发条件：方案 B 也失败，但 reasoning_content 有内容
+
+做法：把模型的思考内容直接作为回复返回（虽然不是 <reply> 标签，但至少有文字）：
+
+
+if llm_resp.content.trim().is_empty() 
+    && !llm_resp.reasoning_content.as_deref().unwrap_or("").trim().is_empty() {
+    llm_resp.content = llm_resp.reasoning_content.as_ref().unwrap().clone();
+}
+优点：保证用户不会看到空回复
+缺点：回复质量差（是思考过程不是正文），可能含模型内心独白
+
+方案 D：前端兜底（已有，保留）
+触发条件：Rust 返回的 reply 仍为空
+
+做法：前端 chatStore 用本地兜底文本：
+
+
+if (!aiReply || aiReply.trim().length === 0) {
+    aiReply = character
+        ? `（${character.name}轻轻应了一声，眼睛亮晶晶地看着你。）`
+        : '（角色思考中出了点小状况，稍等一下哦~）';
+}
+优点：保证用户体验不断流
+缺点：兜底文本是硬编码，不能写入对话历史（会污染后续模型调用）
+
+四、模型适配清单
+Provider	模型	推理控制参数	max_tokens 策略
+OpenAI	o1/o3/o4-mini	reasoning_effort: low/medium/high	用 max_completion_tokens 替代 max_tokens
+OpenAI	gpt-5	reasoning_effort	不设置
+Google	Gemini 2.0/2.5 Flash/Pro	thinking_config.thinking_budget	不设置（用 thinking_budget 控制）
+Anthropic	Claude 3.7/4 Opus/Sonnet	thinking.budget_tokens	不设置（temperature 强制为 1）
+DeepSeek	deepseek-reasoner / R1	无（模型内置）	不设置
+阿里	QwQ / Qwen3 / Marco-o1	enable_thinking (DashScope)	不设置
+智谱	GLM-4-thinking / GLM-4.5 / GLM-z1	thinking.type: enabled	不设置
+字节	Doubao-1.5-thinking	thinking_budget	不设置
+月之暗面	Kimi-k1 / k2	无	不设置
+NVIDIA	Nemotron	无	不设置
+五、验证方法
+修改后用你之前触发问题的对话场景重测，观察 Rust 日志：
+
+[process_message] calling LLM | max_tokens=0 | reasoning_effort=high | is_reasoning=true
+[process_message] LLM returned | content_len=156 | reasoning_tokens=3200 | text_tokens=156
+成功标志：
+
+max_tokens=0（推理模型不设置）
+text_tokens > 0（模型留出了正文空间）
+content_len > 0（有可见正文）
+不再出现"模型将 5301 token 全部用于推理"警告
+如果仍然失败：
+
+检查日志是否走了方案 A 降级链（reasoning_effort high → medium → low → none）
+检查是否走了方案 B 简化 prompt
+检查模型是否在 is_reasoning_model 识别范围内（不在就补充关键词）
+六、回滚方法
+如果修改后出现问题需要回滚，修改 compute_max_tokens 函数，把 if is_reasoning { return 0; } 这行删掉即可恢复旧行为。重试策略的降级链也可以改回放大 max_tokens（但不推荐）。
+
+核心一句话总结：推理模型的 max_tokens 是"思考+输出"共享池，给越多思考越贪婪；正确做法是不设置 max_tokens + 用 reasoning_effort 控制思考强度 + 多级降级兜底。

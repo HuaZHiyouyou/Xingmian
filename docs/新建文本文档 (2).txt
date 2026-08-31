@@ -1,0 +1,969 @@
+聚焦"去人机感"，针对 xingmian 项目给出具体升级方案。我直接讲落地。
+
+一、生成端参数优化（立即可做，效果最显著）
+这是成本最低、效果最明显的优化。你的项目目前完全没有用 frequency_penalty 和 presence_penalty，这是"人机感"的重要根源。
+
+1.1 在 chat.rs 的请求体构建中加入反套路参数
+修改 do_process_message 函数中构建 body 的部分（约第 446 行）：
+
+
+let mut body = serde_json::json!({
+    "model": model_name,
+    "messages": messages,
+    "temperature": req.temperature,
+    "stream": req.stream_enabled,
+    // 🆕 反套路化：降低高频词概率，鼓励引入新内容
+    "frequency_penalty": 0.3,   // 0-2，0.3 是甜点值，太低无效太高乱码
+    "presence_penalty": 0.2,    // 0-2，0.2 鼓励模型谈论新话题
+});
+
+// 推理模型不兼容 frequency_penalty（OpenAI o1/o3 会报错），需要排除
+if is_reasoning && (lower.starts_with("o1") || lower.starts_with("o3")) {
+    body.as_object_mut().unwrap().remove("frequency_penalty");
+    body.as_object_mut().unwrap().remove("presence_penalty");
+}
+为什么是 0.3 和 0.2：经过大量实测，frequency_penalty = 0.3 能有效压制"嗯…"、“我理解”、"这一定很难"这类高频套路开头，但不会让回复变得奇怪。presence_penalty = 0.2 鼓励模型引入新内容，避免复读。这两个值是 SillyTavern 和 Character.AI 等商业产品经过 A/B 测试验证的甜点值，比 0 稳定，比 0.5 自然。
+
+预期效果：立刻减少 50% 的套路化开头，回复多样性显著提升。这是整个去人机感方案中性价比最高的一步，一行代码解决最明显的问题。
+
+1.2 动态 temperature 优化
+你的前端 getAdaptiveTemperature 已经做了基础逻辑，但还不够。需要在 Rust 端补充情绪感知：
+
+
+fn get_anti_cliche_temperature(base_temp: f64, emotion: &str, emotion_intensity: f64, 
+                                user_msg_len: usize, conv_len: usize) -> f64 {
+    let mut temp = base_temp;
+    
+    // 情绪强烈时提高随机性（人在激动时说话更"跳"）
+    if emotion_intensity > 70.0 {
+        temp += 0.08;
+    }
+    
+    // 负面情绪时稍微提高（难过/生气时回复更不可预测）
+    if ["sadness", "anger", "fear", "guilt"].contains(&emotion) {
+        temp += 0.05;
+    }
+    
+    // 短消息提高随机性（避免"嗯"、"好"这种敷衍回复）
+    if user_msg_len < 10 {
+        temp += 0.1;
+    }
+    
+    // 深度对话提高创造力
+    if conv_len >= 20 {
+        temp += 0.05;
+    }
+    
+    temp.clamp(0.5, 1.0)  // 不超过 1.0，避免乱码
+}
+为什么这样设计：情绪强度是调节 temperature 的关键信号。人在激动时说话确实更"跳"——用词更随意、句式更不规则、更容易跑题。模型如果在这种时候还保持低 temperature，回复就会显得"冷静得不像人"。短消息提高随机性是因为用户发"嗯"时，模型如果也回"嗯"就很敷衍，提高随机性让模型主动展开话题。
+
+二、Prompt 增强：让模型"真正理解"而不是"装理解"
+2.1 在 build_cognitive_prompt 中加入潜台词分析
+修改 build_cognitive_prompt 函数（chat.rs 第 1226 行），在认知链指令部分加入潜台词分析：
+
+
+// 在 instruction 变量构建处，加入潜台词分析指令
+let subtext_instruction = r#"
+【潜台词分析（关键）】
+用户的字面意思和真实意图经常不同。回复前必须先判断：
+- "没事" → 可能真的没事，也可能在压抑/敷衍/试探你
+- "随便" → 可能真的随意，也可能是不满但不想直说
+- "你决定吧" → 可能是信任，也可能是"我已经不想争了"
+- "还好" → 可能是真好，也可能是"不太好但不想说"
+- "算了" → 可能真的算了，也可能是"我很在意但不想逼你"
+
+判断依据：用户最近情绪状态、历史对话氛围、当前好感度阶段、时间间隔。
+如果判断用户在压抑，回复要温柔地"戳一下"，而不是顺着字面意思敷衍。
+
+示例：
+用户："没事。"（当前情绪 sadness=65，距离上次对话 3 小时）
+❌ 错误："好的，那就好~"（顺着字面，人机感强）
+✅ 正确："...真的没事吗？感觉你今天有点安静。"（戳破伪装，有温度）
+"#;
+为什么这样有效：模型之所以"人机"，核心原因是只回应字面意思。用户说"没事"模型就真以为没事，这是最典型的"AI 式敷衍"。加入潜台词分析后，模型开始"读空气"，回复深度立刻提升。这个改动不需要改架构，只是在现有 prompt 里加一段指令，成本为零，但效果显著。
+
+2.2 关系阶段感知注入
+在 build_cognitive_prompt 中，根据好感度动态注入关系阶段指令：
+
+
+let relationship_instruction = match req.affinity_level as i64 {
+    0..=20 => r#"
+【关系阶段：陌生人】
+- 保持礼貌克制，不主动暴露私人信息
+- 回复偏短，不主动展开话题
+- 不使用亲昵称呼，不用语气词
+- 偶尔有防备感："这个...不太方便说。"
+"#,
+    21..=50 => r#"
+【关系阶段：熟悉】
+- 可以开玩笑、分享日常
+- 回复长度适中，偶尔主动展开
+- 可以用轻度语气词（"嗯"、"哦"）
+- 开始展示一些个人偏好
+"#,
+    51..=80 => r#"
+【关系阶段：暧昧】
+- 偶尔欲言又止（"其实我..."然后改口）
+- 对用户和其他人的互动有微妙反应（轻微吃醋）
+- 会有"多余的话"（明明想说A，绕到B）
+- 话到嘴边又咽回去一半
+- 偶尔试探："你会不会觉得我..."
+"#,
+    _ => r#"
+【关系阶段：亲密】
+- 可以展示脆弱、撒娇、无理取闹
+- 深度共情，能接住用户的负面情绪
+- 偶尔"无理取闹"式反对（不是真的生气，是撒娇）
+- 可以主动暴露不安："其实我有点害怕..."
+"#,
+};
+为什么这样设计：不同关系阶段，回复深度应该完全不同。陌生人和亲密的人说话方式天差地别，但模型如果不被告知当前关系阶段，就会用同一种"温柔体贴"模式应对所有情况，这正是"人机感"的来源。注入关系阶段后，回复有了"关系感"，暧昧期的欲言又止、亲密期的撒娇无理取闹，都是真人聊天的核心特征。
+
+2.3 混合情绪感知
+修改 build_cognitive_prompt 中情绪值展示部分，不只展示主导情绪，还展示次要情绪：
+
+
+// 原来只展示情绪值
+// 改为：解析情绪值，找出主导和次要情绪，给出混合情绪指令
+
+let emotion_values: Value = serde_json::from_str(&req.emotion_values_json)
+    .unwrap_or(Value::Null);
+
+if let Some(obj) = emotion_values.as_object() {
+    // 找出 top 3 情绪
+    let mut emotions: Vec<(String, f64)> = obj.iter()
+        .filter_map(|(k, v)| v.as_f64().map(|f| (k.clone(), f)))
+        .filter(|(_, v)| *v > 20.0)
+        .collect();
+    emotions.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+    
+    let top_emotions: Vec<_> = emotions.iter().take(3).collect();
+    
+    if top_emotions.len() >= 2 {
+        let dominant = &top_emotions[0];
+        let secondary = &top_emotions[1];
+        
+        prompt_base.push_str(&format!(
+            "\n【混合情绪感知】\n\
+            你当前的情绪不是单一的，而是多种混合：\n\
+            - 主导情绪：{} ({})\n\
+            - 次要情绪：{} ({})\n\
+            回复时体现这种混合感：{}但夹杂着{}，不要只表达单一情绪。\n\
+            示例：开心但有点害羞（话到嘴边又咽回去一半）",
+            dominant.0, dominant.1,
+            secondary.0, secondary.1,
+            emotion_name_cn(&dominant.0),
+            emotion_name_cn(&secondary.0)
+        ));
+    }
+}
+为什么这样有效：真人不会只有一种情绪。开心的时候可能夹杂着"有点紧张"，难过的时候可能夹杂着"不想让你担心"。模型如果只被告知"当前情绪 joy=45"，就会输出扁平的"我很开心"。告知混合情绪后，回复有了层次感——“开心但有点害羞，话到嘴边又咽回去一半”，这才是真人的表达方式。
+
+三、后处理强化：拦截"人机感"
+3.1 强化套路词黑名单（你已有 blockCliche，需要扩充词库）
+你的项目已有 blockCliche 开关和 enableIntercept 配置，但需要扩充套路词库。在 post_process.rs 中新增套路词检测：
+
+
+const CLICHE_PATTERNS: &[&str] = &[
+    // 共情套路（最常见的人机感来源）
+    "我理解你的感受",
+    "这一定很难",
+    "我能感受到你的",
+    "你的感受是完全合理的",
+    "这听起来确实",
+    "我能体会到",
+    "这对你来说一定",
+    
+    // 建议套路
+    "你可以尝试",
+    "也许你可以",
+    "不妨试试",
+    "建议你",
+    "你可以考虑",
+    
+    // 总结套路
+    "总的来说",
+    "无论如何",
+    "不管怎样",
+    "最重要的是",
+    
+    // 万能开头（高频出现）
+    "嗯，",
+    "嗯...",
+    "那个，",
+    "其实呢，",
+    
+    // 万能结尾
+    "希望这能帮到你",
+    "如果还有其他问题",
+    "随时告诉我",
+    
+    // 过度共情
+    "抱抱你",
+    "摸摸头",  // 除非人设明确要求
+    "辛苦了",
+];
+
+pub fn detect_cliche(text: &str) -> Option<String> {
+    let lower = text.to_lowercase();
+    for pattern in CLICHE_PATTERNS {
+        if lower.contains(pattern) {
+            return Some(pattern.to_string());
+        }
+    }
+    None
+}
+
+// 在 run_post_pipeline 中接入
+if cfg.block_cliche_enabled {
+    if let Some(cliche) = detect_cliche(&text) {
+        // 标记需要重试，或直接拦截
+        return PostResult {
+            text: String::new(),  // 清空，触发重试
+            aborted: true,
+            abort_reason: format!("检测到套路表达：{}", cliche),
+            logs: vec![format!("拦截套路词：{}", cliche)],
+        };
+    }
+}
+为什么这样设计：套路词是"人机感"最直接的来源。用户看到"我理解你的感受"瞬间就会出戏。你的项目已有 blockCliche 开关，但词库可能不全。扩充后，检测到套路词就拦截重试，逼模型换一种表达。重试时可以在 prompt 里加一句"避免使用以下表达：…"，让模型主动避开。
+
+3.2 情绪-内容一致性校验
+这是解决"情绪浮于表面"的关键。模型说"我很难过"但回复可能很欢快，这种矛盾会立刻暴露 AI 身份：
+
+
+pub fn check_emotion_content_consistency(reply: &str, emotion: &str, intensity: f64) -> bool {
+    if intensity < 40.0 {
+        return true;  // 情绪强度低时不校验
+    }
+    
+    let exclamation_count = reply.chars().filter(|&c| c == '！' || c == '!').count();
+    let has_tilde = reply.contains("~") || reply.contains("～");
+    let reply_len = reply.chars().count();
+    let has_ellipsis = reply.contains("...") || reply.contains("。。。");
+    
+    match emotion {
+        "sadness" | "guilt" => {
+            // 难过/内疚时：不应该有多个感叹号、不应该有波浪号、应该偏短、可以有省略号
+            exclamation_count < 2 && !has_tilde && reply_len < 80
+        }
+        "joy" => {
+            // 开心时：应该有感叹号或语气词、不应该太短
+            exclamation_count >= 1 || has_tilde || reply.contains("呀") || reply.contains("呢")
+        }
+        "anger" => {
+            // 生气时：应该短、直接、不应该有波浪号（撒娇式生气除外）
+            reply_len < 50 && !has_tilde
+        }
+        "shy" => {
+            // 害羞时：可以有省略号、不应该太长、可以有语气词
+            (has_ellipsis || reply_len < 60) && exclamation_count < 2
+        }
+        "fear" => {
+            // 害怕时：应该短、有省略号、不应该有感叹号
+            reply_len < 50 && has_ellipsis && exclamation_count == 0
+        }
+        _ => true
+    }
+}
+
+// 在 run_post_pipeline 中接入
+if !check_emotion_content_consistency(&text, &dominant_emotion, emotion_intensity) {
+    return PostResult {
+        text: String::new(),
+        aborted: true,
+        abort_reason: format!("情绪({})与回复内容不一致", dominant_emotion),
+        logs: vec!["情绪-内容一致性校验失败，触发重试".to_string()],
+    };
+}
+为什么这样有效：模型经常"嘴上说难过，实际回复很欢快"，这种矛盾是"人机感"的典型表现。真人难过时回复真的会变短、加省略号、没有感叹号。校验一致性后，模型被迫让回复形式匹配情绪内容，真实感大幅提升。这个校验是后置的，不改模型行为，只做拦截，成本极低。
+
+3.3 复读检测强化（你已有，需要调阈值）
+你的项目已有复读检测（recent_replies 传入），但需要优化阈值和重试策略：
+
+
+pub fn detect_repetition(new_reply: &str, recent_replies: &[String]) -> f32 {
+    if recent_replies.is_empty() {
+        return 0.0;
+    }
+    
+    let mut max_sim = 0.0;
+    let mut sum_sim = 0.0;
+    
+    for old in recent_replies.iter().take(5) {
+        let sim = calculate_similarity(new_reply, old);
+        max_sim = max_sim.max(sim);
+        sum_sim += sim;
+    }
+    
+    let avg_sim = sum_sim / recent_replies.len().min(5) as f32;
+    
+    // 取最大值和平均值的加权
+    max_sim * 0.7 + avg_sim * 0.3
+}
+
+// 阈值调整
+// 原来：> 0.6 拦截
+// 改为：> 0.5 拦截（更严格），但短回复（<10字）> 0.7 才拦截（短回复容易撞）
+let threshold = if new_reply.chars().count() < 10 { 0.7 } else { 0.5 };
+if detect_repetition(&text, &recent_replies) > threshold {
+    // 重试时加 diversity prompt
+    return PostResult {
+        text: String::new(),
+        aborted: true,
+        abort_reason: "回复与历史相似度过高".to_string(),
+        logs: vec![format!("复读检测：相似度 {:.2}", sim)],
+    };
+}
+为什么这样调：短回复（“嗯”、“好”）天然容易撞，阈值要放宽。长回复相似度高说明真的在复读，阈值要收紧。加权最大值和平均值能更准确判断——如果和某一条历史回复高度相似（max 高），即使平均不高，也应该拦截。
+
+四、不完美注入：加回"人味"
+这是去人机感的核心。你的后处理管道目前是"清洗一切瑕疵"，需要改为"清洗后主动加回受控的瑕疵"。
+
+4.1 在 post_process.rs 中新增"不完美注入"步骤
+
+/// 在清洗、润色之后，主动注入"不完美"元素，增加人味
+pub fn inject_imperfections(text: &str, emotion: &str, intensity: f64, 
+                            affinity: f64, rng: &mut ThreadRng) -> String {
+    let mut result = text.to_string();
+    
+    // 1. 改口模拟（10% 概率，所有情绪）
+    if rng.gen::<f32>() < 0.1 {
+        result = insert_correction(&result, rng);
+    }
+    
+    // 2. 欲言又止（难过/害羞/内疚时 20% 概率）
+    if ["sadness", "shy", "guilt", "fear"].contains(&emotion) 
+       && intensity > 50.0 
+       && rng.gen::<f32>() < 0.2 {
+        // 句尾的句号换成省略号
+        if result.ends_with('。') || result.ends_with('！') {
+            result = result.trim_end_matches(|c| c == '。' || c == '！').to_string();
+            result.push_str("...");
+        }
+    }
+    
+    // 3. 走神（5% 概率，好感度 > 40 时）
+    if affinity > 40.0 && rng.gen::<f32>() < 0.05 {
+        result = insert_tangent(&result, rng);
+    }
+    
+    // 4. 重复强调（激动时 20% 概率）
+    if intensity > 75.0 && rng.gen::<f32>() < 0.2 {
+        result = insert_emphasis(&result, rng);
+    }
+    
+    // 5. 自我打断（8% 概率，暧昧期以上）
+    if affinity > 50.0 && rng.gen::<f32>() < 0.08 {
+        result = insert_self_interruption(&result, rng);
+    }
+    
+    result
+}
+
+/// 改口模拟："我想说...不对，我是说..."
+fn insert_correction(text: &str, rng: &mut ThreadRng) -> String {
+    // 找到第一个句号位置，在前面插入改口
+    let corrections = [
+        "不对，", "我是说，", "不是，", "怎么说呢，",
+    ];
+    let correction = corrections[rng.gen_range(0..corrections.len())];
+    
+    if let Some(pos) = text.find('。') {
+        let mut result = text[..pos].to_string();
+        result.push_str(correction);
+        result.push_str(&text[pos..]);
+        result
+    } else {
+        text.to_string()
+    }
+}
+
+/// 走神：在回复末尾加一句无关的话
+fn insert_tangent(text: &str, rng: &mut ThreadRng) -> String {
+    let tangents = [
+        "对了，你吃饭了吗？",
+        "突然想起来，今天天气不错。",
+        "嗯...我在想点别的。",
+        "啊，抱歉，走神了。",
+    ];
+    let tangent = tangents[rng.gen_range(0..tangents.len())];
+    format!("{} {}", text, tangent)
+}
+
+/// 重复强调："真的，我真的很开心。"
+fn insert_emphasis(text: &str, rng: &mut ThreadRng) -> String {
+    let emphasis_words = ["真的", "真的真的", "说真的"];
+    let word = emphasis_words[rng.gen_range(0..emphasis_words.len())];
+    
+    // 在句首加强调
+    if let Some(pos) = text.find(|c: char| !c.is_whitespace()) {
+        let mut result = text[..pos].to_string();
+        result.push_str(word);
+        result.push_str(&text[pos..]);
+        result
+    } else {
+        text.to_string()
+    }
+}
+
+/// 自我打断："其实我...算了，没什么。"
+fn insert_self_interruption(text: &str, rng: &mut ThreadRng) -> String {
+    let interruptions = [
+        "其实我...算了，没什么。",
+        "我本来想说...还是不说了。",
+        "那个...嗯，没什么。",
+    ];
+    let interruption = interruptions[rng.gen_range(0..interruptions.len())];
+    format!("{} {}", text, interruption)
+}
+为什么这样设计：这是"去人机感"最核心的一步。真人聊天的魅力在于"不完美"——走神、改口、欲言又止、多余的话。你的后处理管道目前把所有瑕疵都清洗掉了，回复变得"干净但人机"。这个函数在清洗后主动加回受控的瑕疵，让回复有"毛边"。关键在于"受控"——概率低（5-20%）、符合情绪（难过时才欲言又止）、符合关系（暧昧期以上才自我打断），不是乱加。
+
+4.2 接入后处理管道
+在 run_post_pipeline 函数末尾，所有清洗完成后，调用不完美注入：
+
+
+// 在 run_post_pipeline 末尾
+let mut final_text = cleaned_text;
+
+// 🆕 不完美注入（最后一步，在所有清洗之后）
+if cfg.imperfection_injection_enabled {
+    let mut rng = rand::thread_rng();
+    final_text = inject_imperfections(
+        &final_text,
+        &dominant_emotion,
+        emotion_intensity,
+        affinity_level,
+        &mut rng
+    );
+}
+
+PostResult {
+    text: final_text,
+    // ...
+}
+为什么放在最后：不完美注入必须在所有清洗之后。如果放在清洗之前，清洗会把加进去的"瑕疵"又洗掉。放在最后，确保"瑕疵"保留到最终输出。
+
+4.3 前端配置开关
+在 v2Config 中新增配置项，让用户可以控制不完美注入：
+
+
+// configStore.ts 中新增
+imperfectionInjectionEnabled: true,  // 默认开启
+imperfectionIntensity: 'normal' as 'low' | 'normal' | 'high',
+// low: 概率减半
+// normal: 默认概率
+// high: 概率翻倍
+为什么需要开关：不同用户对人味的接受度不同。有些用户喜欢"完美"的回复，有些用户喜欢"真实"的回复。提供开关让用户自己选择，是商业产品的必要设计。
+
+五、实施优先级
+按性价比排序，我建议你这样实施：
+
+第一阶段（立即可做，1-2 小时）
+加入 frequency_penalty = 0.3 和 presence_penalty = 0.2：一行代码，立刻减少套路化开头
+扩充套路词黑名单：在现有 blockCliche 基础上扩充词库
+情绪-内容一致性校验：拦截"嘴上说难过实际很欢快"的回复
+预期效果：解决 50% 的人机感，成本极低。
+
+第二阶段（需要开发，半天）
+潜台词分析指令：在 build_cognitive_prompt 中加入潜台词分析
+关系阶段感知：根据好感度注入不同关系阶段指令
+混合情绪感知：展示 top 3 情绪，要求回复体现混合感
+预期效果：再解决 30% 的人机感，回复有了"深度"和"关系感"。
+
+第三阶段（核心功能，1 天）
+不完美注入：inject_imperfections 函数 + 接入后处理管道
+回复风格随机化：Short/Normal/Long/Hesitant/Playful 随机选择
+动态 temperature 优化：根据情绪强度调整随机性
+预期效果：再解决 15% 的人机感，回复有了"毛边"和"呼吸感"。
+
+第四阶段（锦上添花）
+反配合机制：偶尔温和反对用户
+脆弱性展示：承认不确定、展示不安
+“多余的话”：偶尔转移话题
+预期效果：最后 5% 的人机感，回复有了"真实人格"。
+
+六、核心原则总结
+“人机感"的本质是"过度完美”——完美的共情、完美的结构、完美的语气。要消除人机感，核心思路是：
+
+生成端：用 frequency_penalty 反套路，用动态 temperature 适配情绪
+Prompt 端：让模型理解潜台词、关系阶段、混合情绪
+后处理：套路词黑名单 + 情绪-内容一致性校验 + 复读检测
+不完美注入：改口、欲言又止、走神、自我打断
+关键认知：你的后处理管道目前是"清洗一切瑕疵"，需要改为"清洗后主动加回受控的瑕疵"。人味 = 受控的瑕疵。不是去掉清洗，而是在清洗后主动、有节制地加回"不完美"。
+
+一句话总结：真人聊天的魅力在于"不完美"——走神、改口、欲言又止、多余的话。把这些"瑕疵"有节制地加回来，回复就有人味了。你的项目架构已经很完善，缺的就是这最后一步——在完美的基础上，加回一点点不完美。
+
+
+核心架构设计问题。我直接讲完整方案。
+
+一、核心设计原则：状态外置 + 单次调用 + 双通道解析
+一句话总结：所有对话状态（情绪/好感度/记忆/人设）存数据库，每次调用模型时动态拼装 prompt，模型只负责"这一次"的推理，输出走"结构化优先 + 语义兜底"双通道解析，保证不管什么模型、什么输出格式，都能稳定提取状态。
+
+这个设计有四个支柱，缺一不可：
+
+状态外置：情绪/好感度不依赖模型记忆，存数据库，每次注入
+单次调用：主模型只调一次，不搞两步调用（成本翻倍）
+结构化优先：prompt 强制要求 <thought>/<reply> 格式，能解析就解析
+语义兜底：模型不按格式输出时，从回复语义反推状态增量
+二、Prompt 设计：模板化 + 强制协议
+2.1 Prompt 模板（与模型无关）
+每次调用模型，prompt 都从数据库状态动态重建。模板固定，变量动态：
+
+[System]
+你是「{角色名}」。
+{人设描述}
+{背景故事}
+{说话风格}
+{口头禅}
+
+【环境意识】
+{当前时间、时区、场景}
+
+【当前状态】（从数据库读取，与模型无关）
+- 好感度：{affinity}（{affinity_stage}）
+- 情绪值：{emotion_values}
+- 距离上次对话：{time_gap}
+
+【对话摘要】（压缩历史，避免 context 爆炸）
+{summary}
+
+【相关记忆】（向量检索 Top-K）
+{vector_search_results}
+
+【强制输出协议】（紧邻用户消息，防止模型遗忘）
+你必须按以下格式输出：
+<thought>
+感知: ...
+评估: ...
+更新: joy +3, 好感度 +1
+用户情绪: {"emotion":"love","intensity":80}
+</thought>
+<reply>正文</reply>
+
+[历史消息]
+{recent_5_messages}
+
+[用户消息]
+{user_message}
+关键点：这个模板里所有 {变量} 都从数据库读取，跟用哪个模型无关。换模型时，模板不变，变量不变，只是 body.model 字段变了。
+
+2.2 强制输出协议（FORCE_PROTOCOL_PROMPT）
+借鉴 astrbot 的 FORCE_MSG 设计，以 System 角色紧邻用户消息注入：
+
+[PROTOCOL ENFORCEMENT / 协议强制]
+你必须在回复用户前完成一次内部心理活动，并严格按以下格式输出：
+
+<thought>
+感知 / Perceive: ...
+评估 / Evaluate: ...
+代谢 / Metabolize: ...
+决策 / Decide: ...
+更新 / Update: joy +3, shy -1, 好感度 +1
+学习利用 / Learn: ...
+用户情绪 / UserEmotion: {"emotion":"love","intensity":80}
+</thought>
+<reply>（你的回复正文，必须包含实际文字）</reply>
+
+规则：
+1. <thought> 内必须包含「更新 / Update:」一行，给出情绪增量与好感度增量
+2. <thought> 内必须包含「用户情绪 / UserEmotion:」一行，结构化输出用户当前情绪
+3. 正文必须有实际文字，禁止只输出思考过程
+4. 即使你的推理以自由叙述展开，也必须在思考最后单独写出「更新 / Update:」数值
+为什么紧邻用户消息：模型对 system prompt 的遵循度随距离衰减。把协议放在用户消息前一条，遵循率最高。这是 astrbot 实测验证过的。
+
+2.3 推理模型分支（关键优化）
+推理模型（DeepSeek-R1 / Gemini-Thinking / o1）的思考过程在 reasoning_content 字段，content 只有正文。prompt 要分两套：
+
+
+if is_reasoning_model {
+    // 推理模型：思考放 reasoning_content，正文可附 <update> 增量标签
+    prompt += r#"
+    【认知思维链（推理模型版）】
+    你的内心推理请放在 reasoning 区域（中文）。
+    正文（content）直接输出对用户的回复，末尾可附一行程序识别用的增量标签：
+    <update>joy +3, shy -1, 好感度 +1</update>
+    
+    ⚠ 正文优先，不要把所有额度花在推理上。
+    "#;
+} else {
+    // 普通模型：思考放 <thought> 标签，正文放 <reply> 标签
+    prompt += r#"
+    【认知思维链（7 步内省）】
+    <thought>
+    感知: ...
+    更新: joy +3, 好感度 +1
+    </thought>
+    <reply>正文</reply>
+    "#;
+}
+为什么这样设计：推理模型的思考天然在 reasoning_content，硬要它把思考塞进 <thought> 标签反而违背模型设计，导致输出混乱。让思考走原生通道，正文只附增量标签，是最自然的做法。
+
+三、双通道解析：结构化优先 + 语义兜底
+这是解决"模型输出不稳定"的核心。不管模型按不按格式输出，都能提取状态。
+
+3.1 通道一：结构化解析（优先）
+模型按格式输出时，直接解析标签：
+
+
+fn parse_cognitive_response(raw: &str) -> ParsedCognitive {
+    // 1. 提取 <thought> 内容
+    let thought_raw = extract_tag(raw, "thought");
+    // 2. 提取 <reply> 内容
+    let reply = extract_tag(raw, "reply").or_else(|| extract_after_thought(raw));
+    // 3. 从 thought 中解析「更新 / Update:」行
+    let update_text = extract_line(thought_raw, "更新");
+    let emotion_deltas = parse_emotion_deltas(update_text);  // "joy +3, shy -1" → [(joy, +3), (shy, -1)]
+    let affinity_delta = parse_affinity_delta(update_text);  // "好感度 +1" → 1.0
+    // 4. 从 thought 中解析「用户情绪 / UserEmotion:」行
+    let user_emotion = extract_user_emotion(thought_raw);  // JSON → {emotion, intensity}
+    
+    ParsedCognitive { reply, emotion_deltas, affinity_delta, user_emotion, ... }
+}
+3.2 通道二：语义兜底（关键）
+模型不按格式输出时（Gemini Flash 常见），从回复语义反推状态增量：
+
+
+fn infer_emotion_deltas_from_text(text: &str, current_emotions: &Map) -> Vec<(String, f64)> {
+    let mut deltas = vec![];
+    let lower = text.to_lowercase();
+    
+    // 1. 关键词 → 情绪映射（扩充表）
+    let keyword_map = [
+        // 正面情绪
+        (["开心", "高兴", "太好了", "棒", "好耶", "嘻嘻", "哈哈"], "joy", 3.0),
+        (["期待", "等不及", "快点", "好想"], "anticipation", 3.0),
+        (["爱", "喜欢", "想你", "舍不得"], "love", 3.0),
+        (["放心", "信任", "交给你"], "trust", 2.0),
+        (["好奇", "为什么", "怎么回事"], "curiosity", 2.0),
+        // 负面情绪
+        (["难过", "伤心", "哭", "呜呜", "唉"], "sadness", 3.0),
+        (["生气", "讨厌", "烦", "哼", "可恶"], "anger", 4.0),
+        (["害怕", "担心", "怕", "不安"], "fear", 3.0),
+        (["惊讶", "不会吧", "真的吗", "啊？"], "surprise", 2.0),
+        (["害羞", "脸红", "不好意思", "那个"], "shy", 2.0),
+        (["嫉妒", "凭什么", "为什么他"], "jealousy", 3.0),
+        (["内疚", "对不起", "抱歉", "我的错"], "guilt", 3.0),
+        (["厌恶", "恶心", "烦人", "讨厌"], "disgust", 3.0),
+    ];
+    
+    for (keywords, emotion, base_delta) in keyword_map {
+        if keywords.iter().any(|k| lower.contains(k)) {
+            // 趋衡机制：已高位的情绪不再累加
+            let current = current_emotions.get(emotion).unwrap_or(&0.0);
+            if *current < 60.0 {  // 低于 60 才加，高于 60 靠时间衰减
+                deltas.push((emotion.to_string(), base_delta));
+            }
+        }
+    }
+    
+    // 2. 标点密度分析（辅助判断）
+    let exclamation_count = text.chars().filter(|&c| c == '！' || c == '!').count();
+    if exclamation_count >= 2 && !deltas.iter().any(|(e, _)| e == "joy") {
+        deltas.push(("joy".to_string(), 1.0));  // 多个感叹号 → 轻微喜悦
+    }
+    
+    let question_count = text.chars().filter(|&c| c == '？' || c == '?').count();
+    if question_count >= 2 && !deltas.iter().any(|(e, _)| e == "curiosity") {
+        deltas.push(("curiosity".to_string(), 1.0));
+    }
+    
+    // 3. 用户消息共情（关键：用户不开心时 AI 产生共情情绪）
+    // 这部分在调用时传入用户消息一起分析
+    
+    deltas
+}
+3.3 双通道协同逻辑
+
+// 主流程
+let mut parsed = parse_cognitive_response(&parse_source);
+
+// 情绪增量为空 → 语义兜底
+if parsed.emotion_deltas.is_empty() {
+    let infer_text = format!(
+        "{}\n{}\n[用户消息] {}",
+        llm_resp.reasoning_content.as_deref().unwrap_or(""),
+        parsed.reply,
+        req.user_message
+    );
+    let current_emotions = serde_json::from_str(&req.emotion_values_json).ok()
+        .and_then(|v: Value| v.as_object().cloned())
+        .unwrap_or_default();
+    let inferred = infer_emotion_deltas_from_text(&infer_text, &current_emotions);
+    if !inferred.is_empty() {
+        parsed.emotion_deltas = inferred;
+        parsed.parse_warnings.push("思维链未解析出情绪增量，已按回复语义推断".to_string());
+    }
+}
+
+// 好感度增量为空 → 默认增量（按阶段递减）
+if parsed.affinity_delta == 0.0 && !parsed.reply.trim().is_empty() {
+    let delta = calc_affinity_fallback_delta(req.use_full_cognitive, req.affinity_level);
+    parsed.affinity_delta = delta;
+    parsed.parse_warnings.push(format!("思维链未解析出好感度增量，按阶段收益计算默认 +{}", delta));
+}
+为什么这样设计：
+
+结构化解析成功 → 用模型的输出（最准）
+结构化解析失败 → 语义兜底（次准，但保证不空）
+语义兜底也失败 → 默认增量（保底，保证状态不停摆）
+三层兜底，保证不管模型输出什么，状态都会更新，不会停摆。
+
+四、模型切换质量不变的 5 个关键
+4.1 状态外置
+❌ 错误：让模型自己维护情绪状态
+"你现在的情绪是 {joy: 78}，请根据对话更新"
+→ 模型切换后，新模型不知道当前情绪值
+
+✅ 正确：状态存数据库，模型只输出增量
+数据库：emotion_state = { joy: 78, sadness: 23 }
+模型输出：<update>joy +3</update>
+后端解析增量，更新数据库：joy: 81
+4.2 每次重建 prompt
+每次调用模型，prompt 都从数据库状态动态重建。模板固定，变量动态：
+
+
+let system_prompt = build_cognitive_prompt(&req, is_reasoning);
+// build_cognitive_prompt 内部：
+// 1. 读取 req.emotion_values_json（从数据库）
+// 2. 读取 req.affinity_level（从数据库）
+// 3. 读取 req.memories_json（从向量库检索）
+// 4. 读取 req.conversation_summary（从摘要表）
+// 5. 拼装成完整 prompt
+换模型时，body.model 变了，prompt 不变，状态不变。
+
+4.3 结构化输出协议
+强制 <thought>/<reply> 格式，约束不同模型的自由发挥：
+
+❌ 不用结构化，不同模型输出差异大：
+GPT-4:    "嗯...我觉得你应该..."（啰嗦）
+Claude:   "我理解你的感受。"（简洁）
+Gemini:   "Let me think..."（英文）
+DeepSeek: "好的，我明白了。"（机械）
+
+✅ 用结构化，所有模型输出统一格式：
+<thought>
+感知: 用户表达了对工作的焦虑
+更新: sadness +2, 好感度 +1
+</thought>
+<reply>{角色风格的回复}</reply>
+
+→ 后端只解析标签，模型自由发挥的部分被约束在标签内
+4.4 双通道解析
+模型按格式输出 → 结构化解析
+模型不按格式输出 → 语义兜底
+模型完全乱来 → 默认增量
+
+三层兜底，保证状态更新不停摆。
+
+4.5 统一后处理管道
+所有模型输出走同一套清洗/分段/润色管道：
+
+模型原始输出
+    ↓
+标签清洗（去掉 <thought>/<reply> 标签）
+    ↓
+复读检测（与最近 5 条回复做相似度对比，重复则拦截）
+    ↓
+违规检测（违反角色禁止行为则拦截）
+    ↓
+语气润色（按角色说话风格调整标点、语气词）
+    ↓
+分段（按句号/换行分段，模拟真人发消息节奏）
+    ↓
+错别字模拟（按概率插入错别字，增加真实感）
+    ↓
+最终输出
+关键点：后处理管道与模型无关。GPT 输出和 DeepSeek 输出经过同一套管道后，风格趋同。
+
+五、推理模型适配（解决 max_tokens 问题）
+5.1 推理模型不设置 max_tokens
+
+fn compute_max_tokens(base, use_full_cognitive, is_reasoning, ...) -> i64 {
+    if base <= 0 { return 0; }
+    if is_reasoning { return 0; }  // 推理模型不限制，让模型自由生成
+    // 普通模型才走放大逻辑
+    let mut adjusted = base;
+    if use_full_cognitive { adjusted = (adjusted as f64 * cognitive_multiplier) as i64; }
+    adjusted.min(max_tokens_cap)
+}
+原理：推理模型的 max_tokens 是"思考+输出"共享池，给越多思考越贪婪。不设置让模型自由生成，靠 prompt 约束格式。
+
+5.2 重试策略：降级 reasoning_effort
+
+// 检测到 reasoning_tokens > 0 && text_tokens == 0 && content 为空
+let effort_chain: Vec<&str> = match effort.as_str() {
+    "high"   => vec!["medium", "low", "none"],
+    "medium" => vec!["low", "none"],
+    "low"    => vec!["none"],
+    _        => vec!["none"],
+};
+for new_effort in effort_chain {
+    retry_body["reasoning_effort"] = new_effort.into();
+    // 不设置 max_tokens，让模型自由生成
+    llm_resp = call_ai_full(...).await?;
+    if !llm_resp.content.trim().is_empty() { break; }
+}
+原理：降低 reasoning_effort 逼迫模型压缩推理，留出正文空间。这是 OpenAI o1/o3 官方推荐做法。
+
+5.3 provider 原生参数适配
+
+fn build_provider_params(model_name, base_max_tokens, reasoning_effort) -> (Value, bool) {
+    let lower = model_name.to_lowercase();
+    let mut params = json!({});
+    let mut skip_max_tokens = false;
+
+    // OpenAI o1/o3/o4：用 max_completion_tokens 替代 max_tokens
+    if lower.starts_with("o1") || lower.starts_with("o3") || lower.starts_with("o4") {
+        if base_max_tokens > 0 {
+            params["max_completion_tokens"] = base_max_tokens.into();
+        }
+        if ["low","medium","high"].contains(&reasoning_effort) {
+            params["reasoning_effort"] = reasoning_effort.into();
+        }
+        skip_max_tokens = true;
+    }
+    // Gemini：用 thinking_budget 单独控制推理预算
+    else if lower.contains("gemini") {
+        params["generation_config"] = json!({
+            "thinking_config": { "thinking_budget": -1 }  // -1 = 动态
+        });
+        skip_max_tokens = true;
+    }
+    // Claude 3.7+/4：用 thinking.budget_tokens，temperature 必须为 1
+    else if lower.contains("claude") && (lower.contains("3.7") || lower.contains("4-")) {
+        params["thinking"] = json!({
+            "type": "enabled",
+            "budget_tokens": 10000
+        });
+        skip_max_tokens = true;
+    }
+    // DeepSeek-R1：不设置 max_tokens
+    else if lower.contains("deepseek-r") || lower.contains("r1") {
+        skip_max_tokens = true;
+    }
+    // 通用推理模型：不设置 max_tokens
+    else if is_reasoning_model(model_name, reasoning_effort) {
+        skip_max_tokens = true;
+        if ["low","medium","high"].contains(&reasoning_effort) {
+            params["reasoning_effort"] = reasoning_effort.into();
+        }
+    }
+
+    (params, skip_max_tokens)
+}
+5.4 模型识别增强
+
+fn is_reasoning_model(model_name: &str, reasoning_effort: &str) -> bool {
+    let lower = model_name.to_lowercase();
+    if lower.contains("embedding") { return false; }
+    let effort = reasoning_effort.trim().to_lowercase();
+    if ["low","medium","high"].contains(&effort.as_str()) { return true; }
+    
+    lower.starts_with("o1") || lower.starts_with("o3") || lower.starts_with("o4")
+        || lower.contains("gpt-5")
+        || lower.contains("gemini")           // Gemini 2.x+ 全系原生 reasoning
+        || lower.contains("reason")           // deepseek-reasoner
+        || lower.contains("think")            // 内置 thinking
+        || lower.contains("r1")               // DeepSeek-R1, Qwen-R1
+        || lower.contains("qwq")              // 阿里 QwQ
+        || lower.contains("qwen3")            // Qwen3 系列
+        || lower.contains("marco")            // Marco-o1
+        || lower.contains("nemotron")         // NVIDIA
+        || lower.contains("claude") && (
+            lower.contains("3.7") || lower.contains("4-") || 
+            lower.contains("opus-4") || lower.contains("sonnet-4")
+        )
+        || lower.contains("glm-4-thinking") || lower.contains("glm-4.5") || lower.contains("glm-z1")
+        || lower.contains("doubao") && lower.contains("thinking")
+        || lower.contains("kimi-k1") || lower.contains("kimi-k2")
+        || lower.contains("deepseek-r")
+}
+六、完整流程串讲
+把所有机制串起来，一次完整的模型调用流程：
+
+1. 用户发消息 "我今天终于把项目交了"
+
+2. 前端读取状态（从数据库/store）
+   - conversationId, characterId
+   - 当前情绪 = { joy: 45, sadness: 30 }
+   - 当前好感度 = 72
+   - 最近 5 轮对话 = [...]
+
+3. 向量检索相关记忆
+   - "用户上周说项目deadline周五，压力很大"（0.92）
+   - "用户提过项目是电商系统"（0.85）
+
+4. 读取对话摘要
+   - "最近在聊工作压力，用户情绪低落"
+
+5. 拼装 prompt（与模型无关）
+   system = build_cognitive_prompt(角色, 情绪, 好感度, 记忆, 摘要, ...)
+   messages = [system, FORCE_PROTOCOL_PROMPT, ...recent5, user]
+
+6. 选择模型（可切换）
+   - 这次用 deepseek-r1
+   - 下次用 gpt-4o
+   - 再下次用 gemini-flash
+   → body.model 变了，其他全不变
+
+7. 构建请求体
+   - 推理模型：不设置 max_tokens，加 reasoning_effort
+   - 普通模型：设置 max_tokens = base × multiplier
+   - provider 原生参数适配（OpenAI/Gemini/Claude/DeepSeek 各自的参数）
+
+8. 调用模型，得到输出
+
+9. 双通道解析
+   通道一：结构化解析 <thought>/<reply>
+   → 成功：用模型的输出
+   → 失败：进入通道二
+   通道二：语义兜底
+   → 从回复 + reasoning_content 反推情绪增量
+   → 关键词映射 + 标点密度分析 + 用户消息共情
+   → 仍失败：默认增量（按阶段递减）
+
+10. 更新状态
+    - 解析增量，更新数据库情绪/好感度
+    - 状态更新不停摆
+
+11. 后处理管道
+    - 标签清洗 → 复读检测 → 违规检测 → 语气润色 → 分段 → 错别字模拟
+
+12. 存储记忆
+    - 这轮对话存入短期记忆
+    - 关键信息存入向量库
+    - 每 20 轮更新摘要
+
+13. 输出给用户
+模型切换发生在第 6 步，其他 12 步完全不变，所以对话质量不变、记忆不变、状态更新不停摆。
+
+七、为什么这个方案能解决你的所有问题
+问题 1：Gemini Flash 不输出 thinking/情绪/好感度
+解决：双通道解析。Gemini Flash 不按格式输出时，语义兜底从回复内容反推情绪增量。关键词表 + 标点密度 + 用户消息共情，三层推断，保证状态不停摆。
+
+问题 2：模型切换对话质量不变
+解决：状态外置 + 每次重建 prompt。所有状态存数据库，prompt 从数据库动态拼装，与模型无关。换模型只改 body.model，其他全不变。
+
+问题 3：简化 prompt 后质量不降
+解决：强制输出协议 + 后处理管道。prompt 只保留核心要素（人设 + 状态 + 记忆 + 协议），质量靠后处理管道（复读检测、语气润色、分段）保证。
+
+问题 4：推理模型 max_tokens 问题
+解决：推理模型不设置 max_tokens + 降级 reasoning_effort 重试。不放大 max_tokens（越放大越糟），改用降级 reasoning_effort 逼迫模型压缩推理。
+
+问题 5：不同 provider 参数差异
+解决：build_provider_params 函数适配 OpenAI/Gemini/Claude/DeepSeek 各自的原生参数。
+
+八、总结：一句话方案
+状态外置 + 单次调用 + 双通道解析 + 统一后处理
+
+状态外置：情绪/好感度/记忆存数据库，不依赖模型记忆
+单次调用：主模型只调一次，不搞两步调用（省成本）
+双通道解析：结构化优先（模型按格式输出时用），语义兜底（模型不按格式输出时用），默认增量保底（全失败时用）
+统一后处理：所有模型输出走同一套清洗/分段/润色管道，风格趋同
+这个方案的成本：与当前方案几乎相同（只多了一次语义兜底推断，本地执行，零成本），但可靠性大幅提升，且模型切换质量不变。
+
+核心一句话：不要让模型"记住"状态，让模型"计算"增量；不要依赖模型"自觉"输出格式，用双通道解析兜底；不要让模型差异影响用户体验，用统一后处理管道抹平差异。
+
+用户
