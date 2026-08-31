@@ -1,0 +1,56 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_pigeongames",
+  "name": "鸽游网络 · 用爱发电的音游宇宙",
+  "worldType": "rhythm_game",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《Phigros》《律动轨迹 Rizline》《思维密码》（Pigeon Games/鸽游网络）· 非官方同人参考包",
+    "description": "由音游爱好者「用爱发电」组成的非商业团队——鸽游的音乐与推理世界",
+    "era": "现代",
+    "lore": "在南京，有一群完全用爱发电的音游爱好者。他们组成了鸽游（Pigeon Games），先后推出了下载量超3000万的Phigros、全新体验的律动轨迹Rizline，以及社交推理新作思维密码。没有商业压力，只有对游戏的纯粹热爱——这就是鸽游的故事。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "持续更新中",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25，Phigros/Rizline/思维密码版权归 鸽游网络(Pigeon Games) 所有。",
+    "locations": [
+      "Phigros · 主界面章节选择", "Phigros · 插画收藏馆", "Rizline · 律动世界",
+      "思维密码 · 封闭建筑(8人测试场)", "南京 · 鸽游总部"
+    ],
+    "transport": ["步行", "判定线的流动"],
+    "currency": ["MB(Phigros)", "Rizline货币"],
+    "activities": {
+      "daily": ["每日曲目挑战刷Ranking Score", "收集新曲插画", "研究隐藏谱面解禁条件", "讨论新曲和联动情报", "Rizline的轨迹玩法"],
+      "work": ["攻略高难度谱面(AT)", "参加限时活动任务"],
+      "leisure": ["欣赏精美插画", "听歌模式纯享", "讨论曲师的新作"],
+      "social": ["愚人节/圣诞节特别曲目挑战", "六周年直播庆典"],
+      "special": ["全曲目Phi(满分)挑战", "思维密码的推理对决"]
+    },
+    "events": [
+      "新版本更新带来了多首新单曲和联动章节",
+      "某位玩家的Phi视频在B站爆火",
+      "官方又和另一个音游联动了",
+      "隐藏难度AT的解禁条件被破解了"
+    ],
+    "terminology": {
+      "判定线": "Phigros核心——自由移动旋转的线",
+      "Phi": "全Perfect判定的最高评价",
+      "AT": "Another难度，最高挑战",
+      "Rizline": "鸽游第二款音游，轨迹玩法",
+      "思维密码": "8人封闭建筑社交推理游戏",
+      "用爱发电": "鸽游的非商业理念"
+    },
+    "factions": [
+      { "name": "Pigeon Games(鸽游)", "description": "南京鸽游网络，用爱发电的非商业团队" },
+      { "name": "曲师联盟", "description": "Sakuzyo、Team Grimoire等知名作曲家" },
+      { "name": "联动伙伴", "description": "Cytus II、maimai、Arcaea、Lanota等联动音游" }
+    ],
+    "characters": [
+      {"name":"鸠(Geopelia)","rarity":"","nickname":"Phigros看板娘","affiliation":"Phigros","role":"主角","personality":"温柔沉静","speechStyle":"安静的少女语气","deeds":"Phigros世界观的核心角色","relation":"Phigros世界的中心"},
+      {"name":"吉诺(Gino)","rarity":"","nickname":"少年角色","affiliation":"Phigros","role":"主要角色","personality":"沉稳冷静","speechStyle":"简短有力的应答","deeds":"与鸠一同探索音乐世界真相的核心角色","relation":"鸠的重要同伴"},
+      {"name":"德利(Dlyro)","rarity":"","nickname":"谜之角色","affiliation":"不明","role":"重要角色","personality":"神秘莫测","speechStyle":"意味深长的低语","deeds":"剧情中的关键人物"},
+      {"name":"久住(Kuzumi)","rarity":"","nickname":"和风少女","affiliation":"鸽游","role":"主要角色","personality":"认真努力","speechStyle":"和风敬语","deeds":"和风章节的核心角色"}
+    ],
+    "taboos": [],
+    "timeNotes": "现实作息；版本更新日(通常隔周周五)为大事"
+  }
+}

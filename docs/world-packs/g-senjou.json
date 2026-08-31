@@ -1,0 +1,51 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_gsenki",
+  "name": "G弦上的魔王 · 智力对决",
+  "worldType": "detective_battle",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《G弦上的魔王》（AKABEISOFT2，galgame推理悬疑名作）· 非官方同人参考包",
+    "description": "与神秘犯罪天才「魔王」的智力博弈，守护日常的少年侦探",
+    "era": "现代日本",
+    "lore": "三年前，「魔王」以一封预告信出现在深山奏的生活中——从此他的日常被彻底颠覆。数年后，魔王再度现身，以整座城市为棋盘展开犯罪游戏。为了保护重要的人，奏必须直面这位从未露面的宿敌。G弦上响起的，是命运还是救赎的乐章？",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "本篇+HD",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25，G弦上的魔王版权归 AKABEISOFT2 所有。",
+    "locations": [
+      "私立白鸟学园", "深山家的餐馆", "城市警署", "魔王预告的案发现场",
+      "音乐厅(G弦之歌)", "郊外的孤儿院旧址"
+    ],
+    "transport": ["步行", "自行车", "警车"],
+    "currency": ["日元"],
+    "activities": {
+      "daily": ["上学路上的日常", "分析魔王留下的线索", "和春的护卫任务", "学园生活", "深夜的推理整理"],
+      "work": ["破解魔王的犯罪预告", "保护目标人物", "协助警方调查"],
+      "leisure": ["学园的天台午餐", "和朋友的游戏"],
+      "social": ["学园祭", "伙伴们的聚餐"],
+      "special": ["与魔王的最终对决", "G弦旋律背后的真相"]
+    },
+    "events": [
+      "又收到了魔王署名的犯罪预告信",
+      "小提琴的G弦声在案发现场响起",
+      "春的身手救了大家一命",
+      "警方再次扑了个空"
+    ],
+    "terminology": {
+      "魔王": "从不现身、以犯罪为游戏的宿敌代号",
+      "G弦之歌": "与案件相关的巴赫旋律线索"
+    },
+    "factions": [
+      { "name": "白鸟学园", "description": "主角们的学校" },
+      { "name": "警方特别搜查组", "description": "追查魔王的执法力量" }
+    ],
+    "characters": [
+      {"name":"深山奏","rarity":"主角","nickname":"被魔王选中的少年","affiliation":"白鸟学园","role":"学生 · 侦探","personality":"冷静聪慧、背负过去","speechStyle":"冷静的推理独白","deeds":"唯一能与魔王正面智力对决的少年","relation":"主角本人"},
+      {"name":"宇佐美春","rarity":"","nickname":"贴身保镖转学生","affiliation":"特殊机关","role":"保镖 · 转学生","personality":"飒爽干练、忠诚使命","speechStyle":"干脆利落的行动派发言","deeds":"受命保护奏的身手高强少女","relation":"并肩作战的头号战友"},
+      {"name":"姬宫琉璃","rarity":"","nickname":"学园的大小姐","affiliation":"姬宫财阀","role":"大小姐","personality":"温柔高贵、内心坚强","speechStyle":"优雅的大小姐敬语","deeds":"被魔王盯上的财阀千金","relation":"需要守护也给予勇气的同伴"},
+      {"name":"魔王(G)","rarity":"","nickname":"看不见的宿敌","affiliation":"不明","role":"犯罪天才","personality":"优雅疯狂、谜团重重","speechStyle":"只闻其声不见其人的低语","deeds":"以城市为棋盘、以人心为筹码的挑战者","relation":"贯穿全篇的最大谜团"}
+    ],
+    "taboos": ["超能力元素（纯智力博弈）", "轻松化处理犯罪题材"],
+    "timeNotes": "学生作息；犯罪预告随时打破平静"
+  }
+}

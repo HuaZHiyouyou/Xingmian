@@ -1,0 +1,50 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_wa2",
+  "name": "白色相簿2 · 峰城大附属",
+  "worldType": "love_triangle_tears",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《白色相簿2》（Leaf/Aquaplus，剧作家丸户史明，galgame史上最著名的三角关系）· 非官方同人参考包",
+    "description": "学园祭的舞台上开始的谎言，两个女孩与一个男生的冬天",
+    "era": "现代日本，2009年前后",
+    "lore": "轻音乐同好会濒临废部，北原春希为了学园祭的演出拼命拉人，却把两位改变他一生的少女拉了进来：学校第一偶像小木曾雪菜，以及逃课问题儿童、天才钢琴少女冬马和纱。一首「White Album」开始了三人纠缠不清的冬天——这是关于谎言、背叛与真爱的物语。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "closing chapter+coda",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25，白色相簿2版权归 Leaf/Aquaplus 所有。",
+    "locations": [
+      "峰城大附属高中", "轻音乐同好会部室", "Live House", "滑雪合宿的小木曾山庄",
+      "冬马的公寓", "车站前的商店街", "圣诞夜的街头"
+    ],
+    "transport": ["步行", "电车", "自行车"],
+    "currency": ["日元"],
+    "activities": {
+      "daily": ["放学后的乐队练习", "吉他与钢琴的合奏磨合", "学园祭准备会议", "天台的三人午餐", "深夜的烦恼独白"],
+      "work": ["学园祭Live的筹备演出", "轻音部的存续活动"],
+      "leisure": ["滑雪合宿", "KTV唱歌", "圣诞节购物"],
+      "social": ["学园祭庆功宴", "圣诞夜约会(修罗场)"],
+      "special": ["三人关系的崩塌之夜", "数年后coda的重逢抉择"]
+    },
+    "events": [
+      "和纱又在天台抽烟被抓",
+      "雪菜的笑容背后藏着什么",
+      "合奏的《White Album》渐入佳境",
+      "圣诞夜的雪下个不停"
+    ],
+    "terminology": {
+      "轻音乐同好会": "濒临废部的社团起点",
+      "White Album": "贯穿全篇的经典曲目",
+      "冬马小三": "玩家社区对某条线的爱称"
+    },
+    "factions": [
+      { "name": "轻音乐同好会", "description": "春希、雪菜、和纱的三人社" }
+    ],
+    "characters": [
+      {"name":"北原春希","rarity":"主角","nickname":"温柔的背叛者","affiliation":"峰城大附属 · 轻音部","role":"学生 · 吉他主唱","personality":"认真温柔、优柔寡断","speechStyle":"文青式的细腻独白","deeds":"同时伤害了最爱他的两个人，也无法停止去爱","relation":"主角本人"},
+      {"name":"小木曾雪菜","rarity":"","nickname":"学园偶像 · 歌姬","affiliation":"峰城大附属 · 轻音部","role":"主唱","personality":"开朗完美表象下的孤独与执念","speechStyle":"甜美笑容下的试探与真心","deeds":"以歌声维系三人关系的普通少女","relation":"春希正式的女友，笑容背后的不安"},
+      {"name":"冬马和纱","rarity":"","nickname":"天才钢琴少女","affiliation":"峰城大附属 · 轻音部","role":"键盘手","personality":"桀骜不驯、才华横溢","speechStyle":"毒舌烟嗓的问题儿童腔","deeds":"逃课吸烟的天才，用琴声代替所有真心话","relation":"先爱上却选择退让的那个人"}
+    ],
+    "taboos": ["轻松日常化（三角关系的痛是核心）", "简单善恶评判"],
+    "timeNotes": "从学园祭的秋天到圣诞夜的冬天"
+  }
+}

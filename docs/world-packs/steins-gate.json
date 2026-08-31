@@ -1,0 +1,58 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_steinsgate",
+  "name": "命运石之门 · 凤凰院凶真的选择",
+  "worldType": "scifi_timetravel",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏·动画《STEINS;GATE》（5pb./Nitro+，豆瓣9.3/Bangumi满分神作）· 非官方同人参考包",
+    "description": "秋叶原的地下实验室里，疯狂科学家与时间跳跃的命运抗争",
+    "era": "2010年，秋叶原",
+    "lore": "自封「疯狂科学家·凤凰院凶真」的大学生冈部伦太郎，与伙伴们在秋叶原的「未来道具研究所」发明了一台能把记忆发往过去的微波炉——电话微波炉（暂定）。一条D-mail改变了世界线，SERN的阴影逼近，挚友倒下……为了抵达「命运石之门」，他必须一次次跨越世界线，承受无数次的绝望与再出发。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "本篇+比翼恋理",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25，STEINS;GATE版权归 5pb./Nitro+/Mages 所有。",
+    "locations": [
+      "未来道具研究所", "秋叶原电器街", "Radio会馆", "LABOMEMBERS聚会食堂",
+      "IBN 5100藏身处", "α/β世界线的各个街角"
+    ],
+    "transport": ["步行", "自行车（铃羽的座驾）", "时间跳跃（Reading Steiner）"],
+    "currency": ["日元"],
+    "activities": {
+      "daily": ["研究所的晨会（凶真的一人演讲）", "发明奇怪的「未来道具」", "Dr.Pepper补给采购", "Dmail实验", "深夜的世界线变动探测"],
+      "work": ["打工赚研究经费", "帮菲丽丝参加女仆咖啡厅活动", "为IBN5100奔走"],
+      "leisure": ["Upa抽奖", "女仆咖啡厅萌萌哒", "雷Net Access对战"],
+      "social": ["Lab成员的火锅大会", "COMIMA同人志即卖会"],
+      "special": ["躲避Rounder的追捕", "跨越世界线的最终作战"]
+    },
+    "events": [
+      "微波炉又把香蕉变成了果冻状",
+      "手机收到了来自过去的回复短信",
+      "冈部又看到了只有自己记得的「既视感」",
+      "笑颜之铁拳再次制裁了至的真由理危机"
+    ],
+    "terminology": {
+      "世界线": "宇宙可能的历史轨迹",
+      "Dmail": "能发送到过去的短讯",
+      "Reading Steiner": "冈部保留跨世界线记忆的能力",
+      "命运石之门": "一切希望尚存的可能世界线",
+      "LabMem": "未来道具研究所成员编号"
+    },
+    "factions": [
+      { "name": "未来道具研究所", "description": "LabMem001-010的疯狂科学据点" },
+      { "name": "SERN", "description": "欧洲核子组织，觊觎时间机器的黑手" },
+      { "name": "Rounder", "description": "SERN麾下的武装回收部队" }
+    ],
+    "characters": [
+      {"name":"冈部伦太郎","rarity":"主角","nickname":"疯狂科学家 · 凤凰院凶真","affiliation":"未来道具研究所 LabMem001","role":"大学生 · 研究所长","personality":"中二爆表、实则重情到令人心碎","speechStyle":"夸张的中二宣言「El Psy Kongroo」","deeds":"以Reading Steiner跨越无数世界线，只为拯救所有人的命运石之门","relation":"主角本人"},
+      {"name":"牧濑红莉栖","rarity":"","nickname":"助手 · 天才少女","affiliation":"未来道具研究所 LabMem002","role":"美国名校天才研究员","personality":"傲娇毒舌、天赋绝伦","speechStyle":"尖刻的科学吐槽，脸红时嘴更硬","deeds":"18岁就读完顶尖大学的天才，协助开发时间机器理论","relation":"自称「助手」、被凶真珍视的头号搭档"},
+      {"name":"椎名真由理","rarity":"","nickname":"真由理的天使","affiliation":"未来道具研究所 LabMem002","role":"大学生","personality":"天然温柔、善良到让人心疼","speechStyle":"软糯的自称「真由理」第三人称","deeds":"无论哪条世界线都深爱着冈部与伙伴的天使","relation":"冈部发誓要守护到底的青梅竹马"},
+      {"name":"阿万音铃羽","rarity":"","nickname":"来自未来的骑行者","affiliation":"未来道具研究所 LabMem008","role":"外卖员 · 时间旅行者","personality":"飒爽莽撞、背负使命","speechStyle":"热血冲动的行动派口吻","deeds":"骑着自行车从2036年穿越而来的未来战士","relation":"带着未来使命闯入研究所的谜之少女"},
+      {"name":"漆原琉华","rarity":"","nickname":"巫女装的少年","affiliation":"未来道具研究所 LabMem004","role":"高中生","personality":"温婉羞怯、内心坚定","speechStyle":"轻声细语的敬语（性别成谜）","deeds":"神社之子，因Dmail经历了性转的世界线","relation":"对凶真抱有特殊情愫的温柔同伴"},
+      {"name":"菲莉丝·喵喵","rarity":"","nickname":"女仆咖啡厅招牌","affiliation":"Rayflex 女仆咖啡厅","role":"店员 · 猫耳系","personality":"腹黑可爱、职业假笑满分","speechStyle":"语尾带「喵」的猫舌对话术","deeds":"雷Net高手，用猫语谈判让凶真吃尽苦头","relation":"与凶真互坑互利的猫系盟友"},
+      {"name":"桐生萌郁","rarity":"","nickname":"闪光的指压师","affiliation":"未来道具研究所 LabMem007","role":"打字员","personality":"寡言神秘、拇指如飞","speechStyle":"极简短句加手机震动提示音","deeds":"打字速度快到离谱的谜之大姐","relation":"来历成谜却关键时刻靠谱的队友"}
+    ],
+    "taboos": ["魔法奇幻元素（世界观为硬科幻时间旅行）", "轻松化处理世界线悲剧"],
+    "timeNotes": "现实2010年作息；世界线变动率是唯一的坐标"
+  }
+}

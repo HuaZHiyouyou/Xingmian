@@ -1,0 +1,56 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_haikyuu",
+  "name": "排球少年！！ · 乌野高中",
+  "worldType": "sports_volleyball",
+  "isBuiltin": true,
+  "config": {
+    "source": "漫画·动画《排球少年！！》（古馆春一，Production I.G制作，MAL 8.44）· 非官方同人参考包",
+    "description": "矮个子少年的排球梦，乌野高中的飞吧之路",
+    "era": "现代日本，宫城县仙台",
+    "lore": "被「小巨人」点燃热情的日向翔阳，考入乌野高中排球部——却发现那里有初中就成名的天才二传手影山飞雄。从水火不容到最强搭档，「怪人快攻」的轰鸣响彻球场。飞向顶点吧，乌野！",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "完结（+剧场版）",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25，排球少年版权归 古馆春一/集英社/Production I.G 所有。",
+    "locations": [
+      "乌野高中体育馆", "县营体育馆(春高赛场)", "青叶城西体育馆",
+      "音驹高中(东京)", "白鸟泽学园", "米山拉面店"
+    ],
+    "transport": ["巴士远征", "步行", "自行车"],
+    "currency": ["日元"],
+    "activities": {
+      "daily": ["清晨合宿晨练", "放学后的部活训练", "接球一万次特训", "录像分析会议", "赛后拉面庆功"],
+      "work": ["春高/IH预选赛征战", "对抗强豪校的练习赛"],
+      "leisure": ["东京合宿的自由行", "烧烤大会", "游戏对战"],
+      "social": ["新年参拜", "三年级生的送别会"],
+      "special": ["春高全国大会", "乌野vs音驹的宿命对决"]
+    },
+    "events": [
+      "日向和影山又吵起来了但配合更默契了",
+      "及川彻发出了挑衅的微笑",
+      "教练乌养公布了新的秘密战术",
+      "「今天开始就是春高预选」"
+    ],
+    "terminology": {
+      "春高": "春季高中排球大赛",
+      "IH": "Inter High全国大赛",
+      "怪人快攻": "日向与影山的超速快攻",
+      "乌野": "没有翅膀的堕落的王者，正在重生"
+    },
+    "factions": [
+      { "name": "乌野高中排球部", "description": "主角队伍「飞不起来就不叫乌鸦」" },
+      { "name": "青叶城西", "description": "及川彻率领的县内强豪" },
+      { "name": "音驹高中", "description": "「没有垃圾战」的宿敌" }
+    ],
+    "characters": [
+      {"name":"日向翔阳","rarity":"主角","nickname":"小巨人","affiliation":"乌野高中","role":"副攻手","personality":"元气莽撞、弹跳怪物","speechStyle":"热血咆哮型「うわぁ！」","deeds":"以惊人弹跳与影山完成怪人快攻的阳光少年","relation":"主角本人"},
+      {"name":"影山飞雄","rarity":"","nickname":"球场上的王者","affiliation":"乌野高中","role":"二传手(S)","personality":"孤傲毒舌、纯粹求胜","speechStyle":"直白的「有意思」宣言","deeds":"国中成名天才二传，学会信任队友的王牌","relation":"与日向互补的最强二传搭档"},
+      {"name":"澤村大地","rarity":"","nickname":"队长 · 船长","affiliation":"乌野高中","role":"主攻手 · 队长","personality":"可靠稳重、值得信赖","speechStyle":"队长式的鼓励与训话","deeds":"支撑乌野重生的精神支柱","relation":"全队的定心丸"},
+      {"name":"西谷夕","rarity":"","nickname":"自由人的守护神","affiliation":"乌野高中","role":"Libero","personality":"好胜嘴硬、永不放弃","speechStyle":"「别小看前辈了！」的热血腔","deeds":"身高一米六的最强自由人","relation":"后排的绝对防线"},
+      {"name":"月岛萤","rarity":"","nickname":"冷静的眼镜拦网手","affiliation":"乌野高中","role":"中间拦网手","personality":"理性冷淡、暗中热血","speechStyle":"毒舌的现实主义发言","deeds":"用头脑与身高构筑铁壁的拦网手","relation":"嘴硬的聪明队友"},
+      {"name":"及川彻","rarity":"","nickname":"青城的大王样","affiliation":"青叶城西","role":"二传手","personality":"自信张扬、天赋与努力兼备","speechStyle":"挑衅的王者口吻","deeds":"「才能是可以开花的东西」的信奉者","relation":"最强的对手兼最令人尊敬的敌人"}
+    ],
+    "taboos": ["超能力化（纯体育写实）"],
+    "timeNotes": "部活作息：晨练+放学后训练+周末比赛"
+  }
+}

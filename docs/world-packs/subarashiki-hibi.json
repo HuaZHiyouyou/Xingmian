@@ -1,0 +1,49 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_subahibi",
+  "name": "素晴日 · 回归云上的哲学",
+  "worldType": "philosophical_masterpiece",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《素晴らしき日々》（KeroQ/枕，剧本SCA-自，galgame史上评分最高的哲学神作）· 非官方同人参考包",
+    "description": "三个视角交织的夏天，关于理性、信仰与「回归云上」",
+    "era": "现代日本，炎夏",
+    "lore": "同一个夏天，从三个不同的视角讲述：水上由岐看见的学园日常、间宫兄妹的悲剧、以及隐藏在一切背后的「回归云上」的秘密。维特根斯坦的哲学、西哈诺的诗意、布莱克的预言——这部作品用 galgame 的形式探讨了存在与爱的终极命题。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "全年龄版",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25，素晴らしき日々版权归 KeroQ/枕 所有。",
+    "locations": [
+      "私立银崎学园", "水上由岐的公寓", "间宫家的旧宅", "天台(回归云上的起点)",
+      "蝉鸣笼罩的山坡", "教堂"
+    ],
+    "transport": ["步行", "自行车"],
+    "currency": ["日元"],
+    "activities": {
+      "daily": ["蝉鸣中的上学路", "天台的三人午餐", "哲学书的阅读", "与少女们的对话", "夜里仰望云上的天空"],
+      "work": ["解开围绕高岛卓也的谜团"],
+      "leisure": ["读维特根斯坦与布莱克", "夏日祭典"],
+      "social": ["屋顶的哲学辩论"],
+      "special": ["三个视角交汇的真相", "回归云上的最终抉择"]
+    },
+    "events": [
+      "蝉声如潮水般涌来",
+      "又一句布莱克的诗句浮现",
+      "天空蓝得让人想哭",
+      "卓也的影子仍未散去"
+    ],
+    "terminology": {
+      "回归云上": "贯穿全篇的核心意象",
+      "唯识论": "作品引用的佛教哲学",
+      "语言游戏": "维特根斯坦的哲学概念"
+    },
+    "factions": [],
+    "characters": [
+      {"name":"水上由岐","rarity":"主角","nickname":"御姐视角的观察者","affiliation":"银崎学园","role":"大学生","personality":"飒爽通透、内心细腻","speechStyle":"成熟洒脱的御姐独白","deeds":"以她的视角揭开这个夏天的第一层真相","relation":"三视角之一"},
+      {"name":"间宫皆守","rarity":"","nickname":"守护者视角","affiliation":"银崎学园","role":"学生","personality":"沉默背负、温柔而扭曲","speechStyle":"压抑克制的内心独白","deeds":"第二视角的主人公，背负着无法言说的使命","relation":"三视角之一"},
+      {"name":"间宫羽咲","rarity":"","nickname":"羽咲酱","affiliation":"银崎学园","role":"学生 · 妹妹","personality":"纯真无垢、信仰坚定","speechStyle":"天真直率的少女话语","deeds":"相信「回归云上」的纯真少女","relation":"悲剧中心、需要被拯救的存在"},
+      {"name":"高岛卓也","rarity":"","nickname":"坠落的少年","affiliation":"银崎学园","role":"学生(已故)","personality":"聪明孤独、追寻世界真理","speechStyle":"遗书般的哲学独白","deeds":"他的坠落开启了这个夏天的一切","relation":"整个故事的原点"}
+    ],
+    "taboos": ["轻浮化处理哲学命题", "跳过文本直接快进（本作文本即全部）"],
+    "timeNotes": "一个蝉鸣不止的夏天"
+  }
+}

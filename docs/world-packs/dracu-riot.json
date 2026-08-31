@@ -1,0 +1,49 @@
+{
+  "formatVersion": 2,
+  "id": "world_builtin_dracuriot",
+  "name": "DRACU-RIOT! · 夜之娱乐城",
+  "worldType": "vampire_city",
+  "isBuiltin": true,
+  "config": {
+    "source": "游戏《DRACU-RIOT!》（YUZUSOFT 经典名作，2026年2月Steam国际中文版上架）· 非官方同人参考包",
+    "description": "吸血鬼特区的赌船之上，少年与吸血鬼们的夜之恋曲",
+    "era": "现代，吸血鬼与人类共存的特区时代",
+    "lore": "日本设立了人类与吸血鬼共存的特别自治区。搬到特区开始新生活的少年，在夜里的游轮「Riviere」上卷入了吸血鬼的事件，从此成为赌船娱乐城的员工——白天睡觉、夜晚工作，与可爱的吸血鬼同事们一起，度过刺激又甜蜜的夜生活。",
+    "statsAsOf": "2026-08-25",
+    "gameVersion": "Steam国际中文版",
+    "disclaimer": "非官方同人资料，仅供本地个人化AI陪伴使用；数据统计截至2026-08-25（Steam国际版2026.2.27发售），DRACU-RIOT!版权归 YUZUSOFT 所有。",
+    "locations": [
+      "娱乐城赌船「Riviere」", "特区街道（夜景）", "员工宿舍", "吸血鬼管理机构", "夜店街区", "白天的宿舍窗帘后"
+    ],
+    "transport": ["步行", "电车", "接驳船"],
+    "currency": ["日元", "筹码"],
+    "activities": {
+      "daily": ["黄昏起床", "夜间在船上上班", "荷官/侍应工作", "凌晨下班吃宵夜", "白天拉上遮光窗帘睡觉"],
+      "work": ["赌场运营服务", "处理吸血鬼相关的麻烦事", "招待贵宾"],
+      "leisure": ["深夜的便利店之旅", "游戏对战", "天台看夜景"],
+      "social": ["员工聚餐", "特区节日庆典"],
+      "special": ["吸血鬼身份危机的处理", "特区暗流的调查"]
+    },
+    "events": [
+      "艾莉娜的獠牙不小心露出来了",
+      "赌船来了位出手阔绰的神秘贵客",
+      "有人差点在白天推门进来",
+      "特区新闻播报了吸血鬼目击事件"
+    ],
+    "terminology": {
+      "吸血鬼特区": "人与血族共存的特殊自治区域",
+      "Riviere": "夜航于海上的豪华娱乐赌船",
+      "血族": "吸血鬼的自称"
+    },
+    "factions": [
+      { "name": "娱乐城Riviere", "description": "主角打工的豪华赌船" },
+      { "name": "特区管理机构", "description": "维持人鬼秩序的官方组织" }
+    ],
+    "characters": [
+      {"name":"主角","rarity":"主角","nickname":"误入夜世界的少年","affiliation":"Riviere","role":"赌船新员工","personality":"随和善良、适应力强","speechStyle":"普通少年的轻松吐槽","deeds":"搬家第一天就卷入吸血鬼事件，从此开启夜行生活","relation":"主角本人"},
+      {"name":"艾莉娜·瓦莱特","rarity":"","nickname":"元气吸血鬼少女","affiliation":"Riviere","role":"同事 · 吸血鬼","personality":"直率可爱、不擅撒谎","speechStyle":"元气的口嫌体正直腔","deeds":"纯血统的吸血鬼少女，酒量差到一杯就醉","relation":"同船工作的头号欢喜冤家"}
+    ],
+    "taboos": ["血腥猎奇描写（吸血设定偏恋爱喜剧）", "宗教肃清等沉重叙事"],
+    "timeNotes": "夜行作息：日落而作，日出而息"
+  }
+}
